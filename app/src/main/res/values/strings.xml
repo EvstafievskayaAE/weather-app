@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <string name="choose_city"><u>Choose city</u></string>
+    <string name="address">Simferopol</string>
+    <string name="current_date">28 January 2020, 10:36 AM</string>
+    <string name="sky_description">Clear Sky</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunrise_time">06:40 AM</string>
+    <string name="sunset">Sunset</string>
+    <string name="sunset_time">06:40 AM</string>
+    <string name="wind">Wind</string>
+    <string name="error_text">Something went wrong</string>
 </resources>

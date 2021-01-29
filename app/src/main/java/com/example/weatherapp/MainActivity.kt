@@ -1,68 +1,70 @@
 package com.example.weatherapp
 
 import android.Manifest
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.icu.number.NumberFormatter.with
+import android.icu.number.NumberRangeFormatter.with
 import android.location.Location
 import android.location.LocationManager
+import android.os.AsyncTask
 import android.os.Build
+import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.*
-import java.text.SimpleDateFormat
-import java.util.*
-
-import android.os.AsyncTask
 import android.view.View
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import org.json.JSONObject
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.example.weatherapp.Model.OpenWeatherMap
+import com.google.android.gms.location.*
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.net.URL
-import java.util.*
-import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
-
-    val CITY: String = "dhaka,bd"
-    val API: String = "b5695569eeb89ee67d2b47e883e416dd"
+    var result: String? = null
+    val API = "b5695569eeb89ee67d2b47e883e416dd"
+    val uiScope = CoroutineScope(Dispatchers.Default)
+    internal var openWeatherMap = OpenWeatherMap()
 
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
-   /* private val INTERVAL: Long = 2000
-    private val FASTEST_INTERVAL: Long = 1000*/
+    private val INTERVAL: Long = 5000
+    private val FASTEST_INTERVAL: Long = 1000
     lateinit var mLastLocation: Location
     internal lateinit var mLocationRequest: LocationRequest
     private val REQUEST_PERMISSION_LOCATION = 10
     private var latitude:Double? = null
     private var longitude:Double? = null
 
-    lateinit var button: Button
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         mLocationRequest = LocationRequest()
-        button = findViewById(R.id.button)
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessageNoGps()
         }
         if (checkPermissionForLocation(this)) {
             startLocationUpdates()
-            weatherTask().execute()
         }
-        button.setOnClickListener {
-        }}
+
+            weatherTask().execute()
+
+            /**COROUTINS using*/
+       /* uiScope.launch {
+               callToOpenWeatherMap()
+               extractJSON()
+            }*/
+        }
 
     /**Вывод диалогового окна включения gps*/
     private fun buildAlertMessageNoGps() {
@@ -83,14 +85,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     protected fun startLocationUpdates() {
-
-        // Create the location request to start receiving updates
-
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-       /* mLocationRequest!!.setInterval(INTERVAL)
-        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
+        /*mLocationRequest!!.setInterval(INTERVAL)*/
+       /* mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
 
-        // Create LocationSettingsRequest object using location request
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
         val locationSettingsRequest = builder.build()
@@ -102,14 +100,12 @@ class MainActivity : AppCompatActivity() {
         // new Google API SDK v11 uses getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(
                         this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
+                        ACCESS_FINE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_COARSE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
         ) {
-
-
             return
         }
         mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback,
@@ -118,19 +114,16 @@ class MainActivity : AppCompatActivity() {
 
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            // do work here
             locationResult.lastLocation
             onLocationChanged(locationResult.lastLocation)
         }
     }
 
     fun onLocationChanged(location: Location) {
-        // New location has now been determined
-
         mLastLocation = location
         latitude = mLastLocation.latitude
         longitude = mLastLocation.longitude
-        // You can now create a LatLng Object for use with maps
+        weatherTask().execute(CommonSettings.weatherMapAPIRequest(latitude.toString(),longitude.toString()))
     }
 
     private fun stoplocationUpdates() {
@@ -149,15 +142,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**проверка разрешения на определение местоположения*/
-    fun checkPermissionForLocation(context: Context): Boolean {
+    private fun checkPermissionForLocation(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+            if (context.checkSelfPermission(ACCESS_FINE_LOCATION) ==
                     PackageManager.PERMISSION_GRANTED) {
                 true
             } else {
-                // Show the permission request
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                ActivityCompat.requestPermissions(this, arrayOf(ACCESS_FINE_LOCATION),
                         REQUEST_PERMISSION_LOCATION)
                 false
             }
@@ -167,19 +159,69 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    /**COROUTINS function*/
+    private suspend fun callToOpenWeatherMap() {
+       withContext(Dispatchers.Default) {
+            try {
+                result = URL(
+                    CommonSettings.weatherMapAPIRequest(
+                        latitude.toString(),
+                        longitude.toString()
+                    )
+                ).readText(
+                    Charsets.UTF_8
+                )
+            } catch (e: Exception) {
+                result = null
+            }
+        }
+    }
+    private suspend fun extractJSON(){
+        withContext(Dispatchers.Default) {try {
+            val gson = Gson()
+            val typeToken = object:TypeToken<OpenWeatherMap>(){}.type
+
+            openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
+
+            findViewById<TextView>(R.id.address).text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
+            findViewById<TextView>(R.id.updated_at).text =  "Updated at: ${CommonSettings.currentDate}"
+            findViewById<TextView>(R.id.sky_description).text = "${openWeatherMap.weather!![0].description}"
+            findViewById<TextView>(R.id.temp).text = "${openWeatherMap.main!!.temp} °C"
+            findViewById<TextView>(R.id.temp_min).text = "${openWeatherMap .main!!.temp_min} °C"
+            findViewById<TextView>(R.id.temp_max).text = "${openWeatherMap.main!!.temp_max} °C"
+            findViewById<TextView>(R.id.sunrise).text = "${CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)}"
+            findViewById<TextView>(R.id.sunset).text = "${CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)}"
+            findViewById<TextView>(R.id.wind).text = "${openWeatherMap.wind!!.speed} м/с"
+
+            findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
+            findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.VISIBLE
+        } catch (e: Exception) {
+            findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
+            findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
+        }
+            }
+
+        }
+
     inner class weatherTask() : AsyncTask<String, Void, String>() {
         override fun onPreExecute() {
             super.onPreExecute()
-            /* Showing the ProgressBar, Making the main design GONE */
+             //Showing the ProgressBar, Making the main design GONE
             findViewById<ProgressBar>(R.id.loader).visibility = View.VISIBLE
             findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.GONE
             findViewById<TextView>(R.id.errorText).visibility = View.GONE
         }
         override fun doInBackground(vararg params: String?): String? {
+          /*  var stream:String?=null
+            var urlString = params[0]
+
+            val http = httpHelper()
+            stream = http.getHTTPData(urlString)
+            return stream*/
             var response:String?
             try{
                 response = URL("https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&units=metric&appid=$API").readText(
-                        Charsets.UTF_8
+                    Charsets.UTF_8
                 )
             }catch (e: Exception){
                 response = null
@@ -189,39 +231,34 @@ class MainActivity : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             try {
-                /* Extracting JSON returns from the API */
-                val jsonObj = JSONObject(result)
-                val main = jsonObj.getJSONObject("main")
-                val sys = jsonObj.getJSONObject("sys")
-                val wind = jsonObj.getJSONObject("wind")
-                val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
-                val updatedAt:Long = jsonObj.getLong("dt")
-                val updatedAtText = "Updated at: "+ SimpleDateFormat("dd/MM/yyyy hh:mm a").format(Date(updatedAt*1000))
-                val temp = main.getString("temp")+"°C"
-                val tempMin = "Min Temp: " + main.getString("temp_min")+"°C"
-                val tempMax = "Max Temp: " + main.getString("temp_max")+"°C"
-                val sunrise:Long = sys.getLong("sunrise")
-                val sunset:Long = sys.getLong("sunset")
-                val windSpeed = wind.getString("speed")
-                val weatherDescription = weather.getString("description")
-                val address = jsonObj.getString("name")+", "+sys.getString("country")
-                /* Populating extracted data into our views */
-                findViewById<TextView>(R.id.address).text = address
-                findViewById<TextView>(R.id.updated_at).text =  updatedAtText
-                findViewById<TextView>(R.id.status).text = weatherDescription.capitalize()
-                findViewById<TextView>(R.id.temp).text = temp
-                findViewById<TextView>(R.id.temp_min).text = tempMin
-                findViewById<TextView>(R.id.temp_max).text = tempMax
-                findViewById<TextView>(R.id.sunrise).text = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunrise*1000))
-                findViewById<TextView>(R.id.sunset).text = SimpleDateFormat("hh:mm a", Locale.ENGLISH).format(Date(sunset*1000))
-                findViewById<TextView>(R.id.wind).text = windSpeed
-                /* Views populated, Hiding the loader, Showing the main design */
+                val gson = Gson()
+                val typeToken = object:TypeToken<OpenWeatherMap>(){}.type
+
+                openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
+
+                findViewById<TextView>(R.id.address).text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
+                findViewById<TextView>(R.id.updated_at).text =  "Updated at: ${CommonSettings.currentDate}"
+                findViewById<TextView>(R.id.sky_description).text = "${openWeatherMap.weather!![0].description}"
+                findViewById<TextView>(R.id.temp).text = "${openWeatherMap.main!!.temp} °C"
+                findViewById<TextView>(R.id.feels_like).text = "feels like: ${openWeatherMap.main!!.feels_like} °C"
+                findViewById<TextView>(R.id.temp_min).text = "min temp: ${openWeatherMap .main!!.temp_min} °C"
+                findViewById<TextView>(R.id.temp_max).text = "max temp: ${openWeatherMap.main!!.temp_max} °C"
+                findViewById<TextView>(R.id.sunrise).text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
+                findViewById<TextView>(R.id.sunset).text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
+                findViewById<TextView>(R.id.wind).text = "${openWeatherMap.wind!!.speed} м/с"
+
+                Picasso.with(this@MainActivity)
+                        .load(CommonSettings.getImage(openWeatherMap.weather!![0].icon!!))
+                        .into(findViewById<ImageView>(R.id.imageView))
+
                 findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
                 findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.VISIBLE
             } catch (e: Exception) {
                 findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
                 findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
             }
+
         }
     }
+
 }
