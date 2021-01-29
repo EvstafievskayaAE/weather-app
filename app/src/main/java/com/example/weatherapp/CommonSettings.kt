@@ -1,16 +1,22 @@
 package com.example.weatherapp
 
+import okhttp3.HttpUrl
 import java.text.SimpleDateFormat
 import java.util.*
 
 object CommonSettings {
     val weatherMapAPI = "b5695569eeb89ee67d2b47e883e416dd"
-    val weatherMapLink = "https://api.openweathermap.org/data/2.5/weather"
 
-    fun weatherMapAPIRequest(latitude:String, longitude:String):String{
-        var requestStringBuilder = StringBuilder(weatherMapLink)
-        requestStringBuilder.append("?lat=${latitude}&lon=${longitude}&units=metric&appid=${weatherMapAPI}")
-        return requestStringBuilder.toString()
+    fun weatherMapAPIRequest(latitude:String, longitude:String): HttpUrl {
+        return HttpUrl.Builder()
+            .scheme("https")
+            .host("api.openweathermap.org")
+            .addPathSegment("data/2.5/weather")
+            .addQueryParameter("lat",latitude)
+            .addQueryParameter("lon",longitude)
+            .addQueryParameter("units","metric")
+            .addQueryParameter("appid", weatherMapAPI)
+            .build()
     }
 
     fun convertUnixTimeStampToDateTime(unixTimeStamp:Double):String{
@@ -30,6 +36,4 @@ object CommonSettings {
         val date = Date()
         return dateFormat.format(date)
     }
-
-
 }
