@@ -30,14 +30,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val EXTRA_MESSAGE = "com.example.myfirstapp.MESSAGE"
-
     //OK HTTP
     private val okHttpClient = OkHttpClient()
     private val okHttpHelper = OkHttpHelper()
 
     //Определение местоположения
-    private val INTERVAL: Long = 5000 //время обновления в мс
+    private val INTERVAL: Long = 25000 //время, через которое пройдет обновление, в мс
     private val FASTEST_INTERVAL: Long = 1000 //время обновления в мс
     private val REQUEST_PERMISSION_LOCATION = 10
 
@@ -65,16 +63,18 @@ class MainActivity : AppCompatActivity() {
 
         if (checkPermissionForLocation(this))
             startLocationUpdates()
+
+        val changeCityLink: TextView = changeCityLinkTextView
+        changeCityLink.setOnClickListener {
+            startSearchingCityActivity()
         }
-/*
-    fun sendMessage(view: View) {
-        val editText = findViewById<EditText>(R.id.editText)
-        val message = editText.text.toString()
-        val intent = Intent(this, DisplayMessageActivity::class.java).apply {
-            putExtra(EXTRA_MESSAGE, message)
         }
+
+    /**Запуск активности выбора городов*/
+    private fun startSearchingCityActivity(){
+        val intent = Intent(this, SearchingCityActivity::class.java)
         startActivity(intent)
-    }*/
+    }
 
     /**Вывод диалогового окна включения gps*/
     private fun buildAlertMessageNoGps() {
@@ -97,8 +97,8 @@ class MainActivity : AppCompatActivity() {
     protected fun startLocationUpdates() {
         /**Установка высокой точности определения местоположения*/
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        /*mLocationRequest!!.setInterval(INTERVAL)*/
-       /* mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
+        mLocationRequest!!.setInterval(INTERVAL)
+        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -202,11 +202,12 @@ class MainActivity : AppCompatActivity() {
             return@withContext response
         }
 
-        private fun onPreExecute() {
+        private suspend fun onPreExecute() {
             //Showing the ProgressBar, Making the main design GONE
             loaderProgressBar.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
+            delay(100) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
         }
 
         private fun onPostExecute(result: String) {

@@ -8,11 +8,12 @@
     android:background="@drawable/gradient">
 
     <SearchView
-        android:layout_width="367dp"
+        android:layout_width="361dp"
         android:layout_height="wrap_content" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="367dp"
+    <ListView
+        android:id="@+id/citiesListView"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
 </LinearLayout>

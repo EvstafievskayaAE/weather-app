@@ -10,4 +10,9 @@
     <string name="sunset_time">06:40 AM</string>
     <string name="wind">Wind</string>
     <string name="error_text">Something went wrong</string>
+    <string name="wind_speed">0 м/с</string>
+    <string name="min_temp">min temp: 0 °C</string>
+    <string name="max_temp">max temp: 17 °C</string>
+    <string name="temp">15 °C</string>
+    <string name="date">01.02.2021</string>
 </resources>
