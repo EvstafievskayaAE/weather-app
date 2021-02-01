@@ -24,7 +24,7 @@
                 android:layout_height="10dp" />
 
             <TextView
-                android:id="@+id/change_city"
+                android:id="@+id/changeCityLink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -36,14 +36,14 @@
                 android:layout_height="10dp" />
 
             <TextView
-                android:id="@+id/address"
+                android:id="@+id/addressTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/address"
                 android:textSize="24sp" />
 
             <TextView
-                android:id="@+id/updated_at"
+                android:id="@+id/updatedAtTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/current_date"
@@ -66,14 +66,14 @@
             android:layout_centerInParent="true">
 
             <TextView
-                android:id="@+id/sky_description"
+                android:id="@+id/skyDescriptionTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:layout_gravity="center"
                 android:text="@string/sky_description"/>
             <TextView
-                android:id="@+id/temp"
+                android:id="@+id/tempTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="60sp"
@@ -84,7 +84,7 @@
             android:layout_height="10dp"
             android:layout_width="wrap_content"/>
             <TextView
-                android:id="@+id/feels_like"
+                android:id="@+id/feelsLikeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
@@ -98,14 +98,14 @@
                 android:orientation="horizontal"
                 android:gravity="center">
                 <TextView
-                    android:id="@+id/temp_min"
+                    android:id="@+id/tempMinTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <Space
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"/>
                 <TextView
-                    android:id="@+id/temp_max"
+                    android:id="@+id/tempMaxTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
@@ -143,7 +143,7 @@
                         android:textSize="12sp"
                         android:text="@string/sunrise"/>
                     <TextView
-                        android:id="@+id/sunset"
+                        android:id="@+id/sunsetTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
@@ -174,7 +174,7 @@
                         android:textSize="12sp"
                         android:text="@string/sunset"/>
                     <TextView
-                        android:id="@+id/sunrise"
+                        android:id="@+id/sunriseTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
@@ -203,7 +203,7 @@
                         android:textSize="12sp"
                         android:text="@string/wind"/>
                     <TextView
-                        android:id="@+id/wind"
+                        android:id="@+id/windTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="14sp"/>
@@ -213,13 +213,13 @@
 
     </RelativeLayout>
     <ProgressBar
-        android:id="@+id/loader"
+        android:id="@+id/loaderProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone"/>
     <TextView
-        android:id="@+id/errorText"
+        android:id="@+id/errorTextTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"

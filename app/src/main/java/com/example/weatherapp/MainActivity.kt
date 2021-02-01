@@ -25,6 +25,7 @@ import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -203,9 +204,9 @@ class MainActivity : AppCompatActivity() {
 
         private fun onPreExecute() {
             //Showing the ProgressBar, Making the main design GONE
-            findViewById<ProgressBar>(R.id.loader).visibility = View.VISIBLE
-            findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.GONE
-            findViewById<TextView>(R.id.errorText).visibility = View.GONE
+            loaderProgressBar.visibility = View.VISIBLE
+            mainContainer.visibility = View.GONE
+            errorTextTextView.visibility = View.GONE
         }
 
         private fun onPostExecute(result: String) {
@@ -215,34 +216,26 @@ class MainActivity : AppCompatActivity() {
 
                 openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
 
-                findViewById<TextView>(R.id.address).text =
-                    "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
-                findViewById<TextView>(R.id.updated_at).text =
-                    "Updated at: ${CommonSettings.currentDate}"
-                findViewById<TextView>(R.id.sky_description).text =
-                    "${openWeatherMap.weather!![0].description}"
-                findViewById<TextView>(R.id.temp).text = "${openWeatherMap.main!!.temp} °C"
-                findViewById<TextView>(R.id.feels_like).text =
-                    "feels like: ${openWeatherMap.main!!.feels_like} °C"
-                findViewById<TextView>(R.id.temp_min).text =
-                    "min temp: ${openWeatherMap.main!!.temp_min} °C"
-                findViewById<TextView>(R.id.temp_max).text =
-                    "max temp: ${openWeatherMap.main!!.temp_max} °C"
-                findViewById<TextView>(R.id.sunrise).text =
-                    CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
-                findViewById<TextView>(R.id.sunset).text =
-                    CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
-                findViewById<TextView>(R.id.wind).text = "${openWeatherMap.wind!!.speed} м/с"
+                addressTextView.text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
+                updatedAtTextView.text = "Updated at: ${CommonSettings.currentDate}"
+                skyDescriptionTextView.text = "${openWeatherMap.weather!![0].description}"
+                tempTextView.text = "${openWeatherMap.main!!.temp} °C"
+                feelsLikeTextView.text = "feels like: ${openWeatherMap.main!!.feels_like} °C"
+                tempMinTextView.text = "min temp: ${openWeatherMap.main!!.temp_min} °C"
+                tempMaxTextView.text = "max temp: ${openWeatherMap.main!!.temp_max} °C"
+                sunriseTextView.text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
+                sunsetTextView.text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
+                windTextView.text = "${openWeatherMap.wind!!.speed} м/с"
 
                 Picasso.with(this@MainActivity)
                     .load(CommonSettings.getImage(openWeatherMap.weather!![0].icon!!))
-                    .into(findViewById<ImageView>(R.id.imageView))
+                    .into(imageView)
 
-                findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
-                findViewById<RelativeLayout>(R.id.mainContainer).visibility = View.VISIBLE
+                loaderProgressBar.visibility = View.GONE
+                mainContainer.visibility = View.VISIBLE
             } catch (e: Exception) {
-                findViewById<ProgressBar>(R.id.loader).visibility = View.GONE
-                findViewById<TextView>(R.id.errorText).visibility = View.VISIBLE
+                loaderProgressBar.visibility = View.GONE
+                errorTextTextView.visibility = View.VISIBLE
             }
         }
     }
