@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WeatherApp">
         <activity
-            android:name=".SearchingCityActivity"
+            android:name=".ChoiceCityActivity"
             android:screenOrientation="portrait">
 
         </activity>

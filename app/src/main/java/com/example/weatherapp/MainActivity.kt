@@ -26,16 +26,20 @@ import okhttp3.OkHttpClient
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.activity_main.*
+import okhttp3.HttpUrl
 
 
 class MainActivity : AppCompatActivity() {
+
+
+    lateinit var cityName:String
 
     //OK HTTP
     private val okHttpClient = OkHttpClient()
     private val okHttpHelper = OkHttpHelper()
 
     //Определение местоположения
-    private val INTERVAL: Long = 25000 //время, через которое пройдет обновление, в мс
+    private val INTERVAL: Long = 10000 //время, через которое пройдет обновление, в мс
     private val FASTEST_INTERVAL: Long = 1000 //время обновления в мс
     private val REQUEST_PERMISSION_LOCATION = 10
 
@@ -54,6 +58,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        CommonSettings.isCityName=false
+
         mLocationRequest = LocationRequest()
         val locationManager =
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -66,13 +72,14 @@ class MainActivity : AppCompatActivity() {
 
         val changeCityLink: TextView = changeCityLinkTextView
         changeCityLink.setOnClickListener {
-            startSearchingCityActivity()
+            startChoiceCityActivity()
         }
+
         }
 
     /**Запуск активности выбора городов*/
-    private fun startSearchingCityActivity(){
-        val intent = Intent(this, SearchingCityActivity::class.java)
+    private fun startChoiceCityActivity(){
+        val intent = Intent(this, ChoiceCityActivity::class.java)
         startActivity(intent)
     }
 
@@ -97,8 +104,8 @@ class MainActivity : AppCompatActivity() {
     protected fun startLocationUpdates() {
         /**Установка высокой точности определения местоположения*/
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        mLocationRequest!!.setInterval(INTERVAL)
-        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)
+        /*mLocationRequest!!.setInterval(INTERVAL)
+        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -173,7 +180,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    /**COROUTINS function*/
+    /**COROUTINS function, display weather data*/
 
     inner class WeatherTask:CoroutineScope{
         private var job: Job = Job()
@@ -184,17 +191,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun execute() = launch {
-            onPreExecute()
-            val result = doInBackground() // runs in background thread without blocking the Main Thread
-            onPostExecute(result)
+            while (isActive){
+                onPreExecute()
+                val result = doInBackground() // runs in background thread without blocking the Main Thread
+                onPostExecute(result)
+                delay(10000) //обновление данных о погоде каждые 10 с
+            }
         }
         private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
             var response:String
+            var useApi: HttpUrl
             try {
-                response = okHttpHelper.GET(
-                    okHttpClient,
-                    CommonSettings.weatherMapAPIRequest(latitude.toString(), longitude.toString())
-                ).toString()
+                if (CommonSettings.isCityName){
+                    cityName = CommonSettings.chosenCityName
+                    useApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
+                    stoplocationUpdates()
+                }
+                else useApi = CommonSettings.weatherMapAPIRequestByLocation(latitude.toString(), longitude.toString())
+                response = okHttpHelper.GET(okHttpClient,useApi).toString()
             } catch (e: IOException) {
                 e.printStackTrace()
                 response = null.toString()
@@ -207,7 +221,7 @@ class MainActivity : AppCompatActivity() {
             loaderProgressBar.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
-            delay(100) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
+            delay(500) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
         }
 
         private fun onPostExecute(result: String) {

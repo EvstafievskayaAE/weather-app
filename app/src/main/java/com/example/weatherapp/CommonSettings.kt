@@ -6,14 +6,27 @@ import java.util.*
 
 object CommonSettings {
     val weatherMapAPI = "b5695569eeb89ee67d2b47e883e416dd"
+    var isCityName = false
+    var chosenCityName = ""
 
-    fun weatherMapAPIRequest(latitude:String, longitude:String): HttpUrl {
+    fun weatherMapAPIRequestByLocation(latitude:String, longitude:String): HttpUrl {
         return HttpUrl.Builder()
             .scheme("https")
             .host("api.openweathermap.org")
             .addPathSegment("data/2.5/weather")
             .addQueryParameter("lat",latitude)
             .addQueryParameter("lon",longitude)
+            .addQueryParameter("units","metric")
+            .addQueryParameter("appid", weatherMapAPI)
+            .build()
+    }
+
+    fun weatherMapAPIRequestByCityName(city:String):HttpUrl{
+        return HttpUrl.Builder()
+            .scheme("https")
+            .host("api.openweathermap.org")
+            .addPathSegment("data/2.5/weather")
+            .addQueryParameter("q", city)
             .addQueryParameter("units","metric")
             .addQueryParameter("appid", weatherMapAPI)
             .build()

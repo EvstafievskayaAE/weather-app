@@ -15,4 +15,12 @@
     <string name="max_temp">max temp: 17 °C</string>
     <string name="temp">15 °C</string>
     <string name="date">01.02.2021</string>
+    <string name="title">Please, choose city to display the weather</string>
+    <string-array name="cities">
+        <item>Tokyo</item>
+        <item>Moscow</item>
+        <item>San Francisco</item>
+        <item>Vladivostok</item>
+        <item>Durban</item>
+    </string-array>
 </resources>
