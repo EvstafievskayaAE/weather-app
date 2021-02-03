@@ -12,25 +12,28 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
-import android.widget.*
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.Model.OpenWeatherMap
+import com.example.weatherapp.ProjectConstants.PROGRESS_BAR_DELAY
+import com.example.weatherapp.ProjectConstants.REQUEST_GPS_CODE
+import com.example.weatherapp.ProjectConstants.REQUEST_PERMISSION_LOCATION
+import com.example.weatherapp.ProjectConstants.WEATHER_UPDATE_DELAY
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
-import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.HttpUrl
-
 
 class MainActivity : AppCompatActivity() {
-
 
     lateinit var cityName:String
 
@@ -38,27 +41,22 @@ class MainActivity : AppCompatActivity() {
     private val okHttpClient = OkHttpClient()
     private val okHttpHelper = OkHttpHelper()
 
-    //Определение местоположения
-    private val INTERVAL: Long = 10000 //время, через которое пройдет обновление, в мс
-    private val FASTEST_INTERVAL: Long = 1000 //время обновления в мс
-    private val REQUEST_PERMISSION_LOCATION = 10
-
-
+    //Для работы с координатами местоположения
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
     lateinit var mLastLocation: Location
-    internal lateinit var mLocationRequest: LocationRequest
+    private lateinit var mLocationRequest: LocationRequest
 
     private var latitude:Double? = null
     private var longitude:Double? = null
 
     //Сервис для получения данных о погоде
-    internal var openWeatherMap = OpenWeatherMap()
+    private var openWeatherMap = OpenWeatherMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        CommonSettings.isCityName=false
+        CommonSettings.isCityNameChosen=false
 
         mLocationRequest = LocationRequest()
         val locationManager =
@@ -74,7 +72,6 @@ class MainActivity : AppCompatActivity() {
         changeCityLink.setOnClickListener {
             startChoiceCityActivity()
         }
-
         }
 
     /**Запуск активности выбора городов*/
@@ -91,7 +88,7 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("Yes") { dialog, id ->
                     startActivityForResult(
                             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            , 11)
+                            , REQUEST_GPS_CODE)
                 }
                 .setNegativeButton("No") { dialog, id ->
                     dialog.cancel()
@@ -101,8 +98,9 @@ class MainActivity : AppCompatActivity() {
         alert.show()
     }
 
+    /**Запуск обновления координат местоположения*/
     protected fun startLocationUpdates() {
-        /**Установка высокой точности определения местоположения*/
+        //Установка высокой точности определения местоположения
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         /*mLocationRequest!!.setInterval(INTERVAL)
         mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
@@ -136,6 +134,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**Действия при смене координат местоположения*/
     fun onLocationChanged(location: Location) {
         mLastLocation = location
         latitude = mLastLocation.latitude
@@ -145,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         WeatherTask().execute()
     }
 
+    /**Остановка обновления координат местоположения*/
     private fun stoplocationUpdates() {
         mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback)
     }
@@ -179,13 +179,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     /**COROUTINS function, display weather data*/
 
     inner class WeatherTask:CoroutineScope{
         private var job: Job = Job()
         override val coroutineContext: CoroutineContext
-            get() = Dispatchers.Main + job // to run code in Main(UI) Thread
+            get() = Dispatchers.Main + job //запуск кода в основном потоке
         fun cancel() {
             job.cancel()
         }
@@ -193,16 +192,16 @@ class MainActivity : AppCompatActivity() {
         fun execute() = launch {
             while (isActive){
                 onPreExecute()
-                val result = doInBackground() // runs in background thread without blocking the Main Thread
+                val result = doInBackground() //запуск фонового потока без блоеирования основного
                 onPostExecute(result)
-                delay(10000) //обновление данных о погоде каждые 10 с
+                delay(WEATHER_UPDATE_DELAY) //обновление данных о погоде каждые 10 с
             }
         }
         private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
             var response:String
             var useApi: HttpUrl
             try {
-                if (CommonSettings.isCityName){
+                if (CommonSettings.isCityNameChosen){
                     cityName = CommonSettings.chosenCityName
                     useApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
                     stoplocationUpdates()
@@ -217,11 +216,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         private suspend fun onPreExecute() {
-            //Showing the ProgressBar, Making the main design GONE
+            //Запуск прогресс бара при подготовке данных от сервера
             loaderProgressBar.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
-            delay(500) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
+            delay(PROGRESS_BAR_DELAY) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
         }
 
         private fun onPostExecute(result: String) {
@@ -252,6 +251,11 @@ class MainActivity : AppCompatActivity() {
                 loaderProgressBar.visibility = View.GONE
                 errorTextTextView.visibility = View.VISIBLE
             }
+
+            //Запись нового города в переменную
+            if (!CommonSettings.isCityNameChosen)
+            CommonSettings.newCityName = "${openWeatherMap.name}"
+
         }
     }
 }
