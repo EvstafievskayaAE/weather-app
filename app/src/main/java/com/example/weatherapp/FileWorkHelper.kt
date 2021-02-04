@@ -1,6 +1,7 @@
 package com.example.weatherapp
 
 import android.content.Context
+import java.io.FileDescriptor
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
@@ -8,9 +9,9 @@ object FileWorkHelper{
 
     /**Добавление строки в файл*/
     fun addLineToFile(addedLine: String, fileName: String, context: Context) {
-        val fileOutputStream: FileOutputStream =
+        val fileOutputStream: FileOutputStream=
             context.openFileOutput(fileName, Context.MODE_PRIVATE)
-        fileOutputStream.write(addedLine.toByteArray())
+        fileOutputStream.write("${addedLine}\n".toByteArray())
         fileOutputStream.close()
     }
 
