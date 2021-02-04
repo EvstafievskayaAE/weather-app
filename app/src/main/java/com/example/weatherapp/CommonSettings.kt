@@ -1,13 +1,14 @@
 package com.example.weatherapp
 
+import com.example.weatherapp.ProjectConstants.weatherMapAPI
 import okhttp3.HttpUrl
 import java.text.SimpleDateFormat
 import java.util.*
 
 object CommonSettings {
-    val weatherMapAPI = "b5695569eeb89ee67d2b47e883e416dd"
-    var isCityName = false
-    var chosenCityName = ""
+    var isCityNameChosen = false
+    var chosenCityName = "" //название города, выбранного из списка
+    var newCityName = "" //название нового города, добавленного в список
 
     fun weatherMapAPIRequestByLocation(latitude:String, longitude:String): HttpUrl {
         return HttpUrl.Builder()
@@ -45,7 +46,7 @@ object CommonSettings {
 
     val currentDate:String
     get() {
-        val dateFormat = SimpleDateFormat("dd MM yyyy HH:mm")
+        val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm")
         val date = Date()
         return dateFormat.format(date)
     }

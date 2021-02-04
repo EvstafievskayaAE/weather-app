@@ -1,6 +1,4 @@
 package com.example.weatherapp
-
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -13,35 +11,34 @@ import kotlinx.android.synthetic.main.activity_choice_city.*
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
-
     private var arrayAdapter:ArrayAdapter<String> ? = null
-//    private val cities = arrayOf(
-//            "Tokyo", "Moscow", "San-Francisco", "Vladivostok", "Durban"
-//    )
+    private var citiesList:MutableList<String> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice_city)
 
+        //Запись в файл нового определенного по координатам города
+        FileWorkHelper.addLineToFile(CommonSettings.newCityName, "citiesList.txt", applicationContext)
 
-        arrayAdapter= ArrayAdapter(applicationContext,R.layout.custom_listview_item,
-                resources.getStringArray(R.array.cities))
+        //Добавление изначального списка городов в список для отображения
+        citiesList.addAll(resources.getStringArray(R.array.cities))
+        //Добавление городов, определенных по координатам, в список для отображения
+        citiesList.addAll(FileWorkHelper.readLinesFromFile("citiesList.txt",applicationContext))
+
+        arrayAdapter= ArrayAdapter(applicationContext,R.layout.custom_listview_item,citiesList)
+
         citiesListView?.adapter = arrayAdapter
         citiesListView?.choiceMode = ListView.CHOICE_MODE_SINGLE
         citiesListView?.onItemClickListener = this
-
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         var cityName:String = parent?.getItemAtPosition(position) as String
-        val intent = Intent(this@ChoiceCityActivity, MainActivity::class.java)
-        //Создаем данные для передачи:
 
-        CommonSettings.isCityName = true
+        CommonSettings.isCityNameChosen = true
         CommonSettings.chosenCityName = cityName
-        /*intent.putExtra("cityName", cityName)*/
+
         Toast.makeText(applicationContext, "$cityName is chosen", Toast.LENGTH_LONG).show()
-        //Запускаем переход:
-        /*startActivity(intent)*/
     }
 }
