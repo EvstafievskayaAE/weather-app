@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="25dp"
-    android:background="@drawable/gradient">
+    android:background="@drawable/dark_gradient_background">
     <RelativeLayout
         android:id="@+id/mainContainer"
         android:layout_width="match_parent"
@@ -72,12 +73,15 @@
                 android:textSize="18sp"
                 android:layout_gravity="center"
                 android:text="@string/sky_description"/>
+            <Space
+                android:layout_height="20dp"
+                android:layout_width="wrap_content"/>
             <TextView
                 android:id="@+id/tempTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="60sp"
-                android:textStyle="bold"
+                android:textStyle="normal"
                 android:fontFamily="sans-serif-thin"
                 android:layout_gravity="center"
                 android:text="@string/temp"/>
@@ -113,6 +117,20 @@
                     android:layout_height="wrap_content"
                     android:text="@string/max_temp"/>
             </LinearLayout>
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="30dp" />
+
+            <Button
+                android:id="@+id/updateWeatherButton"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:layout_gravity="center"
+                android:background="#F81837E4"
+                android:text="@string/update_weather"
+                android:textSize="10sp"
+                app:backgroundTint="#6E72FC
+" />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/detailsContainer"
@@ -234,5 +252,6 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone"
-        android:text="@string/error_text"/>
+        android:text="@string/error_text"
+        android:gravity="center"/>
 </RelativeLayout>

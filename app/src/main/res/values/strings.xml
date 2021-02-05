@@ -9,13 +9,14 @@
     <string name="sunset">Sunset</string>
     <string name="sunset_time">06:40 AM</string>
     <string name="wind">Wind</string>
-    <string name="error_text">Something went wrong</string>
+    <string name="error_text">Something went wrong.\n Please, check connection to internet.</string>
     <string name="wind_speed">0 м/с</string>
     <string name="min_temp">min temp: 0 °C</string>
     <string name="max_temp">max temp: 17 °C</string>
     <string name="temp">15 °C</string>
     <string name="date">01.02.2021</string>
     <string name="title">Please, choose city to display the weather</string>
+    <string name="update_weather">update weather</string>
     <string-array name="cities">
         <item>Tokyo</item>
         <item>Moscow</item>

@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -21,7 +22,6 @@ import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.ProjectConstants.PROGRESS_BAR_DELAY
 import com.example.weatherapp.ProjectConstants.REQUEST_GPS_CODE
 import com.example.weatherapp.ProjectConstants.REQUEST_PERMISSION_LOCATION
-import com.example.weatherapp.ProjectConstants.WEATHER_UPDATE_DELAY
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -56,13 +56,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        CommonSettings.isCityNameChosen=false
+       /* CommonSettings.isCityNameChosen=false*/
 
         mLocationRequest = LocationRequest()
         val locationManager =
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                && !CommonSettings.isCityNameChosen)
             buildAlertMessageNoGps()
 
         if (checkPermissionForLocation(this))
@@ -72,7 +73,12 @@ class MainActivity : AppCompatActivity() {
         changeCityLink.setOnClickListener {
             startChoiceCityActivity()
         }
+
+        val updateWeatherButton: Button = updateWeatherButton
+        updateWeatherButton.setOnClickListener {
+            WeatherTask().execute()
         }
+    }
 
     /**Запуск активности выбора городов*/
     private fun startChoiceCityActivity(){
@@ -167,20 +173,17 @@ class MainActivity : AppCompatActivity() {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
             if (context.checkSelfPermission(ACCESS_FINE_LOCATION) ==
-                    PackageManager.PERMISSION_GRANTED) {
+                    PackageManager.PERMISSION_GRANTED)
                 true
-            } else {
+            else {
                 ActivityCompat.requestPermissions(this, arrayOf(ACCESS_FINE_LOCATION),
                         REQUEST_PERMISSION_LOCATION)
                 false
             }
-        } else {
-            true
-        }
+        } else true
     }
 
-    /**COROUTINS function, display weather data*/
-
+    /**COROUTINS function, displays weather data*/
     inner class WeatherTask:CoroutineScope{
         private var job: Job = Job()
         override val coroutineContext: CoroutineContext
@@ -190,12 +193,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun execute() = launch {
-            while (isActive){
                 onPreExecute()
                 val result = doInBackground() //запуск фонового потока без блоеирования основного
                 onPostExecute(result)
-                delay(WEATHER_UPDATE_DELAY) //обновление данных о погоде каждые 10 с
-            }
         }
         private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
             var response:String
@@ -206,7 +206,9 @@ class MainActivity : AppCompatActivity() {
                     useApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
                     stoplocationUpdates()
                 }
-                else useApi = CommonSettings.weatherMapAPIRequestByLocation(latitude.toString(), longitude.toString())
+                else useApi = CommonSettings.weatherMapAPIRequestByLocation(
+                        latitude.toString(), longitude.toString())
+
                 response = okHttpHelper.GET(okHttpClient,useApi).toString()
             } catch (e: IOException) {
                 e.printStackTrace()
@@ -237,8 +239,10 @@ class MainActivity : AppCompatActivity() {
                 feelsLikeTextView.text = "feels like: ${openWeatherMap.main!!.feels_like} °C"
                 tempMinTextView.text = "min temp: ${openWeatherMap.main!!.temp_min} °C"
                 tempMaxTextView.text = "max temp: ${openWeatherMap.main!!.temp_max} °C"
-                sunriseTextView.text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
-                sunsetTextView.text = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
+                sunriseTextView.text =
+                        CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
+                sunsetTextView.text =
+                        CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
                 windTextView.text = "${openWeatherMap.wind!!.speed} м/с"
 
                 Picasso.with(this@MainActivity)

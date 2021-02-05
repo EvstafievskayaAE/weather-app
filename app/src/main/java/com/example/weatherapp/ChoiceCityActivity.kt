@@ -1,4 +1,5 @@
 package com.example.weatherapp
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -19,14 +20,17 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         setContentView(R.layout.activity_choice_city)
 
         //Запись в файл нового определенного по координатам города
-        FileWorkHelper.addLineToFile(CommonSettings.newCityName, "citiesList.txt", applicationContext)
+        FileWorkHelper.addLineToFile(
+                CommonSettings.newCityName, "citiesList.txt", applicationContext)
 
         //Добавление изначального списка городов в список для отображения
         citiesList.addAll(resources.getStringArray(R.array.cities))
-        //Добавление городов, определенных по координатам, в список для отображения
-        citiesList.addAll(FileWorkHelper.readLinesFromFile("citiesList.txt",applicationContext))
 
-        arrayAdapter= ArrayAdapter(applicationContext,R.layout.custom_listview_item,citiesList)
+        //Добавление городов, определенных по координатам, в список для отображения
+        citiesList.addAll(FileWorkHelper.readLinesFromFile(
+                "citiesList.txt", applicationContext))
+
+        arrayAdapter = ArrayAdapter(applicationContext, R.layout.custom_listview_item, citiesList)
 
         citiesListView?.adapter = arrayAdapter
         citiesListView?.choiceMode = ListView.CHOICE_MODE_SINGLE
@@ -40,5 +44,13 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         CommonSettings.chosenCityName = cityName
 
         Toast.makeText(applicationContext, "$cityName is chosen", Toast.LENGTH_LONG).show()
+        startMainActivity()
+    }
+
+    /**Запуск основной активности */
+    private fun startMainActivity(){
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
