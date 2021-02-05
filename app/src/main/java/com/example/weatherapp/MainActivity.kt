@@ -6,21 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
-import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.ProjectConstants.PROGRESS_BAR_DELAY
-import com.example.weatherapp.ProjectConstants.REQUEST_GPS_CODE
 import com.example.weatherapp.ProjectConstants.REQUEST_PERMISSION_LOCATION
 import com.google.android.gms.location.*
 import com.google.gson.Gson
@@ -56,15 +52,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-       /* CommonSettings.isCityNameChosen=false*/
+        mainContainer.visibility = View.GONE
+
+       /* CommonSettings.isCityNameChosen=false*/ //будет нужно, если убрать автоматический переход со второй активности
 
         mLocationRequest = LocationRequest()
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                && !CommonSettings.isCityNameChosen)
-            buildAlertMessageNoGps()
 
         if (checkPermissionForLocation(this))
             startLocationUpdates()
@@ -86,30 +78,12 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    /**Вывод диалогового окна включения gps*/
-    private fun buildAlertMessageNoGps() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
-                .setCancelable(false)
-                .setPositiveButton("Yes") { dialog, id ->
-                    startActivityForResult(
-                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                            , REQUEST_GPS_CODE)
-                }
-                .setNegativeButton("No") { dialog, id ->
-                    dialog.cancel()
-                    finish()
-                }
-        val alert: AlertDialog = builder.create()
-        alert.show()
-    }
-
     /**Запуск обновления координат местоположения*/
     protected fun startLocationUpdates() {
         //Установка высокой точности определения местоположения
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         /*mLocationRequest!!.setInterval(INTERVAL)
-        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/
+        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/  //если понадобится автоматическое обновление координат
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -233,9 +207,9 @@ class MainActivity : AppCompatActivity() {
                 openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
 
                 addressTextView.text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
-                updatedAtTextView.text = "Updated at: ${CommonSettings.currentDate}"
+                updatedAtTextView.text = "${CommonSettings.currentDate}"
                 skyDescriptionTextView.text = "${openWeatherMap.weather!![0].description}"
-                tempTextView.text = "${openWeatherMap.main!!.temp} °C"
+                tempTextView.text = "${openWeatherMap.main!!.temp.toInt()}°C"
                 feelsLikeTextView.text = "feels like: ${openWeatherMap.main!!.feels_like} °C"
                 tempMinTextView.text = "min temp: ${openWeatherMap.main!!.temp_min} °C"
                 tempMaxTextView.text = "max temp: ${openWeatherMap.main!!.temp_max} °C"

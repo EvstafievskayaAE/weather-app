@@ -46,7 +46,7 @@ object CommonSettings {
 
     val currentDate:String
     get() {
-        val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm")
+        val dateFormat = SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.ENGLISH)
         val date = Date()
         return dateFormat.format(date)
     }
