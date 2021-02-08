@@ -1,16 +1,19 @@
 package com.example.weatherapp
 
+import android.R.attr.name
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import java.io.FileInputStream
 import java.io.FileOutputStream
+
 
 object FileWorkHelper{
 
     /**Добавление строки в файл*/
     fun addLineToFile(addedLine: String, fileName: String, context: Context) {
         val fileOutputStream: FileOutputStream=
-            context.openFileOutput(fileName, Context.MODE_PRIVATE)
-        fileOutputStream.write(addedLine.toByteArray())
+            context.openFileOutput(fileName, Context.MODE_PRIVATE or Context.MODE_APPEND)
+        fileOutputStream.write("${addedLine}\n".toByteArray())
         fileOutputStream.close()
     }
 

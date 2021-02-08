@@ -7,7 +7,9 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.weatherapp.ProjectConstants.citiesListFileName
 import kotlinx.android.synthetic.main.activity_choice_city.*
+import java.io.File
 
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
@@ -19,16 +21,22 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice_city)
 
-        //Запись в файл нового определенного по координатам города
-        FileWorkHelper.addLineToFile(
-                CommonSettings.newCityName, "citiesList.txt", applicationContext)
+        var file = File(getFilesDir().getAbsolutePath(), citiesListFileName)
+
+        var fileText = FileWorkHelper.readLinesFromFile(citiesListFileName, applicationContext)
+        if(file.exists() && !fileText.contains(CommonSettings.newCityName))
+        {
+            //Запись в файл нового определенного по координатам города
+            FileWorkHelper.addLineToFile(
+                    CommonSettings.newCityName, citiesListFileName, applicationContext)
+        }
 
         //Добавление изначального списка городов в список для отображения
         citiesList.addAll(resources.getStringArray(R.array.cities))
 
         //Добавление городов, определенных по координатам, в список для отображения
         citiesList.addAll(FileWorkHelper.readLinesFromFile(
-                "citiesList.txt", applicationContext))
+                citiesListFileName, applicationContext))
 
         arrayAdapter = ArrayAdapter(applicationContext, R.layout.custom_listview_item, citiesList)
 
