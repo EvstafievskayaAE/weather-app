@@ -1,11 +1,8 @@
 package com.example.weatherapp
 
-import android.R.attr.name
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import java.io.FileInputStream
 import java.io.FileOutputStream
-
 
 object FileWorkHelper{
 
@@ -13,7 +10,11 @@ object FileWorkHelper{
     fun addLineToFile(addedLine: String, fileName: String, context: Context) {
         val fileOutputStream: FileOutputStream=
             context.openFileOutput(fileName, Context.MODE_PRIVATE or Context.MODE_APPEND)
-        fileOutputStream.write("${addedLine}\n".toByteArray())
+        var fileText = readLinesFromFile(fileName, context)
+
+        if(!fileText.contains(addedLine))
+            fileOutputStream.write("${addedLine}\n".toByteArray())
+
         fileOutputStream.close()
     }
 
@@ -21,7 +22,9 @@ object FileWorkHelper{
     fun readLinesFromFile(fileName: String, context: Context):List<String>{
         val fileInputStream: FileInputStream = context.openFileInput(fileName)
         var readLines= fileInputStream.bufferedReader().readLines()
+
         fileInputStream.close()
+
         return readLines
     }
 

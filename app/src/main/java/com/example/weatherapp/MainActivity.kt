@@ -94,11 +94,9 @@ class MainActivity : AppCompatActivity() {
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         if (ActivityCompat.checkSelfPermission(
-                        this,
-                        ACCESS_FINE_LOCATION
+                        this, ACCESS_FINE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
+                        this, Manifest.permission.ACCESS_COARSE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
@@ -120,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         latitude = mLastLocation.latitude
         longitude = mLastLocation.longitude
 
-        /**вызов методов корутины*/
+        /**вызов методов корутины для отображения погоды*/
         WeatherTask().execute()
     }
 
@@ -173,19 +171,19 @@ class MainActivity : AppCompatActivity() {
         }
         private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
             var response:String
-            var useApi: HttpUrl
+            var usedApi: HttpUrl
             try {
                 if (CommonSettings.isCityNameChosen){
                     cityName = CommonSettings.chosenCityName
-                    useApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
+                    usedApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
                     stoplocationUpdates()
                 }
-                else useApi = CommonSettings.weatherMapAPIRequestByLocation(
+                else usedApi = CommonSettings.weatherMapAPIRequestByLocation(
                         latitude.toString(), longitude.toString())
 
-                response = okHttpHelper.GET(okHttpClient,useApi).toString()
-            } catch (e: IOException) {
-                e.printStackTrace()
+                response = okHttpHelper.GET(okHttpClient,usedApi).toString()
+            } catch (exception: IOException) {
+                exception.printStackTrace()
                 response = null.toString()
             }
             return@withContext response
@@ -225,7 +223,7 @@ class MainActivity : AppCompatActivity() {
 
                 loaderProgressBar.visibility = View.GONE
                 mainContainer.visibility = View.VISIBLE
-            } catch (e: Exception) {
+            } catch (exception: Exception) {
                 loaderProgressBar.visibility = View.GONE
                 errorTextTextView.visibility = View.VISIBLE
             }

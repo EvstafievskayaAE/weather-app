@@ -9,8 +9,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp.ProjectConstants.citiesListFileName
 import kotlinx.android.synthetic.main.activity_choice_city.*
-import java.io.File
-
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
@@ -21,23 +19,7 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice_city)
 
-        var file = File(getFilesDir().getAbsolutePath(), citiesListFileName)
-
-        var fileText = FileWorkHelper.readLinesFromFile(citiesListFileName, applicationContext)
-        if(file.exists() && !fileText.contains(CommonSettings.newCityName))
-        {
-            //Запись в файл нового определенного по координатам города
-            FileWorkHelper.addLineToFile(
-                    CommonSettings.newCityName, citiesListFileName, applicationContext)
-        }
-
-        //Добавление изначального списка городов в список для отображения
-        citiesList.addAll(resources.getStringArray(R.array.cities))
-
-        //Добавление городов, определенных по координатам, в список для отображения
-        citiesList.addAll(FileWorkHelper.readLinesFromFile(
-                citiesListFileName, applicationContext))
-
+        fillCitiesList()
         arrayAdapter = ArrayAdapter(applicationContext, R.layout.custom_listview_item, citiesList)
 
         citiesListView?.adapter = arrayAdapter
@@ -53,6 +35,28 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
         Toast.makeText(applicationContext, "$cityName is chosen", Toast.LENGTH_LONG).show()
         startMainActivity()
+    }
+
+    /**Заполнение списка городов*/
+    private fun fillCitiesList(){
+
+        //Получение начального списка городов
+        citiesList.addAll(resources.getStringArray(R.array.cities))
+
+        //Запись начального списка городов в файл
+        for (i in 0 until citiesList.size)
+            FileWorkHelper.addLineToFile(citiesList[i], citiesListFileName, applicationContext)
+
+        //Запись в файл нового определенного по координатам города, если его еще нет там
+        FileWorkHelper.addLineToFile(
+                CommonSettings.newCityName, citiesListFileName, applicationContext)
+
+        //Очистка списка, чтобы исключить повторы
+        citiesList.clear()
+
+        //Добавление всех городов из файла в список для отображения
+        citiesList.addAll(FileWorkHelper.readLinesFromFile(
+                citiesListFileName, applicationContext))
     }
 
     /**Запуск основной активности */
