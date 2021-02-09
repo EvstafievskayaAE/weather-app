@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**Остановка обновления координат местоположения*/
-    private fun stoplocationUpdates() {
+    private fun stopLocationUpdates() {
         mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback)
     }
 
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                 if (CommonSettings.isCityNameChosen){
                     cityName = CommonSettings.chosenCityName
                     usedApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
-                    stoplocationUpdates()
+                    stopLocationUpdates()
                 }
                 else usedApi = CommonSettings.weatherMapAPIRequestByLocation(
                         latitude.toString(), longitude.toString())

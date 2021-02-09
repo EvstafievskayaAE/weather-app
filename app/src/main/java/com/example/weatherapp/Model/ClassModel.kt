@@ -17,3 +17,5 @@ class Main(
         var temp: Double, var feels_like: Double, var pressure: Double,
         var humidity: Int, var temp_min: Double, var temp_max: Double)
 
+class City (var cityId: Int, var cityName: String)
+
