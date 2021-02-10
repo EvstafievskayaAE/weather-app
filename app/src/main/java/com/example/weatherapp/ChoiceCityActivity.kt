@@ -7,7 +7,6 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.weatherapp.ProjectConstants.citiesListFileName
 import kotlinx.android.synthetic.main.activity_choice_city.*
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
