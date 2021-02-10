@@ -43,21 +43,21 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun addNewCityToDb(cityName: String) {
         val database = this.writableDatabase
         val contentValues = ContentValues()
-        contentValues.put(Companion.COLUMN_NAME, cityName)
-        database.insert(Companion.TABLE_NAME, null, contentValues)
+        contentValues.put(COLUMN_NAME, cityName)
+        database.insert(TABLE_NAME, null, contentValues)
     }
 
     fun getCitiesListFromDb(): MutableList<String> {
         val citiesList: MutableList<String> = ArrayList()
         val database = this.readableDatabase
         val query = "Select * from "+ Companion.TABLE_NAME
-        val result = database.rawQuery(query, null)
-        if (result.moveToFirst()) {
+        val cursor = database.rawQuery(query, null)
+        if (cursor.moveToFirst()) {
             do {
-                val cityName =result.getString(result.getColumnIndex(Companion.COLUMN_NAME))
+                val cityName =cursor.getString(cursor.getColumnIndex(COLUMN_NAME))
                 citiesList.add(cityName)
             }
-            while (result.moveToNext())
+            while (cursor.moveToNext())
         }
         return citiesList
     }
