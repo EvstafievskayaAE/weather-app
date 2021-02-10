@@ -13,14 +13,18 @@ import kotlinx.android.synthetic.main.activity_choice_city.*
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private var arrayAdapter:ArrayAdapter<String> ? = null
+    private lateinit var dataBaseHelper:DataBaseHelper
+    private var citiesListFromDb:MutableList<String> = arrayListOf()
     private var citiesList:MutableList<String> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice_city)
 
+        dataBaseHelper = DataBaseHelper(this)
+
         fillCitiesList()
-        arrayAdapter = ArrayAdapter(applicationContext, R.layout.custom_listview_item, citiesList)
+        arrayAdapter = ArrayAdapter(this, R.layout.custom_listview_item, citiesList)
 
         citiesListView?.adapter = arrayAdapter
         citiesListView?.choiceMode = ListView.CHOICE_MODE_SINGLE
@@ -39,24 +43,15 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
     /**Заполнение списка городов*/
     private fun fillCitiesList(){
+        //Получение начального списка городов из БД
+        citiesListFromDb = dataBaseHelper.getCitiesListFromDb()
 
-        //Получение начального списка городов
-        citiesList.addAll(resources.getStringArray(R.array.cities))
+        //Запись в БД нового определенного по координатам города, если его еще нет там
+        if (!citiesListFromDb.contains(CommonSettings.newCityName))
+            dataBaseHelper.addNewCityToDb(CommonSettings.newCityName)
 
-        //Запись начального списка городов в файл
-        for (i in 0 until citiesList.size)
-            FileWorkHelper.addLineToFile(citiesList[i], citiesListFileName, applicationContext)
-
-        //Запись в файл нового определенного по координатам города, если его еще нет там
-        FileWorkHelper.addLineToFile(
-                CommonSettings.newCityName, citiesListFileName, applicationContext)
-
-        //Очистка списка, чтобы исключить повторы
-        citiesList.clear()
-
-        //Добавление всех городов из файла в список для отображения
-        citiesList.addAll(FileWorkHelper.readLinesFromFile(
-                citiesListFileName, applicationContext))
+        //Добавление всех городов из БД в список для отображения
+        citiesList = dataBaseHelper.getCitiesListFromDb()
     }
 
     /**Запуск основной активности */
