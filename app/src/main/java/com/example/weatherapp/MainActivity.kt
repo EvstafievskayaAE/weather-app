@@ -6,17 +6,21 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.ProjectConstants.PROGRESS_BAR_DELAY
+import com.example.weatherapp.ProjectConstants.REQUEST_GPS_CODE
 import com.example.weatherapp.ProjectConstants.REQUEST_PERMISSION_LOCATION
 import com.google.android.gms.location.*
 import com.google.gson.Gson
@@ -55,8 +59,14 @@ class MainActivity : AppCompatActivity() {
         mainContainer.visibility = View.GONE
 
        /* CommonSettings.isCityNameChosen=false*/ //будет нужно, если убрать автоматический переход со второй активности
+        val locationManager =
+                getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mLocationRequest = LocationRequest()
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                && !CommonSettings.isCityNameChosen)
+            buildAlertMessageNoGps()
 
         if (checkPermissionForLocation(this))
             startLocationUpdates()
@@ -70,6 +80,24 @@ class MainActivity : AppCompatActivity() {
         updateWeatherButton.setOnClickListener {
             WeatherTask().execute()
         }
+    }
+
+    /**Вывод диалогового окна включения gps*/
+    private fun buildAlertMessageNoGps() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes") { dialog, id ->
+                    startActivityForResult(
+                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            , REQUEST_GPS_CODE)
+                }
+                .setNegativeButton("No") { dialog, id ->
+                    dialog.cancel()
+                    /*finish()*/
+                }
+        val alert: AlertDialog = builder.create()
+        alert.show()
     }
 
     /**Запуск активности выбора городов*/
