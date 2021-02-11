@@ -6,9 +6,11 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 
-class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class DataBaseHelper(context: Context) : SQLiteOpenHelper(
+        context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     var context = context
+
     companion object {
         const val DATABASE_VERSION = 1
         const val TABLE_NAME = "cities"
@@ -30,9 +32,9 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onCreate(database)
     }
 
-    private fun putCitiesListToDB(database: SQLiteDatabase?){
+    private fun putCitiesListToDB(database: SQLiteDatabase?) {
         val contentValues = ContentValues()
-        val sourceCitiesList:MutableList<String> =
+        val sourceCitiesList: MutableList<String> =
                 context.resources.getStringArray(R.array.cities).toMutableList()
         for (i in 0 until sourceCitiesList.size) {
             contentValues.put(COLUMN_NAME, sourceCitiesList[i])
@@ -50,16 +52,14 @@ class DataBaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun getCitiesListFromDb(): MutableList<String> {
         val citiesList: MutableList<String> = ArrayList()
         val database = this.readableDatabase
-        val query = "Select * from "+ Companion.TABLE_NAME
+        val query = "Select * from " + Companion.TABLE_NAME + " order by " + COLUMN_NAME
         val cursor = database.rawQuery(query, null)
         if (cursor.moveToFirst()) {
             do {
-                val cityName =cursor.getString(cursor.getColumnIndex(COLUMN_NAME))
+                val cityName = cursor.getString(cursor.getColumnIndex(COLUMN_NAME))
                 citiesList.add(cityName)
-            }
-            while (cursor.moveToNext())
+            } while (cursor.moveToNext())
         }
         return citiesList
     }
-
 }
