@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
 
     //Для работы с координатами местоположения
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
+    lateinit var  locationManager: LocationManager
     lateinit var mLastLocation: Location
     private lateinit var mLocationRequest: LocationRequest
 
@@ -59,17 +60,18 @@ class MainActivity : AppCompatActivity() {
         mainContainer.visibility = View.GONE
 
        /* CommonSettings.isCityNameChosen=false*/ //будет нужно, если убрать автоматический переход со второй активности
-        val locationManager =
+        locationManager =
                 getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mLocationRequest = LocationRequest()
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                && !CommonSettings.isCityNameChosen)
-            buildAlertMessageNoGps()
-
-        if (checkPermissionForLocation(this))
+        if (CommonSettings.isCityNameChosen)
+            WeatherTask().execute()
+        else  if (checkPermissionForLocation(this)){
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                buildAlertMessageNoGps()
             startLocationUpdates()
+        }
 
         val changeCityLink: TextView = changeCityLinkTextView
         changeCityLink.setOnClickListener {
@@ -160,6 +162,8 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == REQUEST_PERMISSION_LOCATION) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                    buildAlertMessageNoGps()
                 startLocationUpdates()
             } else {
                 Toast.makeText(this@MainActivity,
