@@ -5,7 +5,7 @@ import java.io.IOException
 
 
 class OkHttpHelper {
-    //GET network request
+    // GET network request
     @Throws(IOException::class)
     fun GET(client: OkHttpClient, url: HttpUrl): String? {
         val request = Request.Builder()
@@ -15,7 +15,7 @@ class OkHttpHelper {
         return response.body()?.string()
     }
 
-    //POST network request
+    // POST network request
     @Throws(IOException::class)
     fun POST(client: OkHttpClient, url: HttpUrl?, body: RequestBody?): String? {
         val request = Request.Builder()

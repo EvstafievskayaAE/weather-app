@@ -35,13 +35,11 @@ import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var cityName:String
-
-    //OK HTTP
+    // OK HTTP
     private val okHttpClient = OkHttpClient()
     private val okHttpHelper = OkHttpHelper()
 
-    //Для работы с координатами местоположения
+    // Для работы с координатами местоположения
     private var mFusedLocationProviderClient: FusedLocationProviderClient? = null
     lateinit var  locationManager: LocationManager
     lateinit var mLastLocation: Location
@@ -50,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private var latitude:Double? = null
     private var longitude:Double? = null
 
-    //Сервис для получения данных о погоде
+    // Сервис для получения данных о погоде
     private var openWeatherMap = OpenWeatherMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,14 +57,14 @@ class MainActivity : AppCompatActivity() {
 
         mainContainer.visibility = View.GONE
 
-       /* CommonSettings.isCityNameChosen=false*/ //будет нужно, если убрать автоматический переход со второй активности
+       /* CommonSettings.isCityNameChosen=false*/ // Будет нужно, если убрать автоматический переход со второй активности
         locationManager =
                 getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mLocationRequest = LocationRequest()
 
-        /**Вызов окна включения gps, если дано разрешение на определение местоположения,
-         * а город не выбран*/
+        /** Вызов окна включения gps, если дано разрешение на определение местоположения,
+         * а город не выбран */
         if (checkPermissionForLocation(this)) {
             if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
                 !CommonSettings.isCityNameChosen)
@@ -74,24 +72,24 @@ class MainActivity : AppCompatActivity() {
             startLocationUpdates()
         }
 
-        /**Запуск корутины для отображения погоды, если город выбран*/
+        /** Запуск корутины для отображения погоды, если город выбран */
         if (CommonSettings.isCityNameChosen)
             WeatherTask().execute()
 
-        /**Запуск активности для выбора города*/
+        /** Запуск активности для выбора города */
         val changeCityLink: TextView = changeCityLinkTextView
         changeCityLink.setOnClickListener {
             startChoiceCityActivity()
         }
 
-        /**Обновление погоды для установленного города*/
+        /** Обновление погоды для установленного города при нажатии кнопки */
         val updateWeatherButton: Button = updateWeatherButton
         updateWeatherButton.setOnClickListener {
             WeatherTask().execute()
         }
     }
 
-    /**Вывод диалогового окна включения gps*/
+    /** Вывод диалогового окна включения gps */
     private fun buildAlertMessageNoGps() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
@@ -103,23 +101,26 @@ class MainActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("No") { dialog, id ->
                     dialog.cancel()
-                    //добавить сообщение или загрузку закешированных данных. сейчас будет выводиться просто фон
+                    // Добавить сообщение или загрузку закешированных данных.
+                    // Сейчас будет выводиться просто фон
                 }
         val alert: AlertDialog = builder.create()
         alert.show()
     }
 
-    /**Запуск активности выбора городов*/
+    /** Запуск активности выбора городов */
     private fun startChoiceCityActivity(){
         val intent = Intent(this, ChoiceCityActivity::class.java)
+        // Флаг для очистки истории переходов между активностями
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         startActivity(intent)
     }
 
-    /**Запуск обновления координат местоположения*/
-    protected fun startLocationUpdates() {
-        //Установка высокой точности определения местоположения
+    /** Запуск обновления координат местоположения */
+    private fun startLocationUpdates() {
+        // Установка высокой точности определения местоположения (мобильная связь, wi-fi и gps)
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
         /*mLocationRequest!!.setInterval(INTERVAL)
         mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/  //если понадобится автоматическое обновление координат
 
@@ -150,22 +151,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**Действия при смене координат местоположения*/
+    /** Действия при смене координат местоположения */
     fun onLocationChanged(location: Location) {
         mLastLocation = location
         latitude = mLastLocation.latitude
         longitude = mLastLocation.longitude
 
-        /**вызов методов корутины для отображения погоды*/
+        /** вызов методов корутины для отображения погоды */
         WeatherTask().execute()
     }
 
-    /**Остановка обновления координат местоположения*/
+    /** Остановка обновления координат местоположения */
     private fun stopLocationUpdates() {
         mFusedLocationProviderClient!!.removeLocationUpdates(mLocationCallback)
     }
 
-    /**проверка разрешения на определение местоположения*/
+    /** Действия по результатам проверки разрешения на определение местоположения */
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         if (requestCode == REQUEST_PERMISSION_LOCATION) {
@@ -176,12 +177,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@MainActivity,
                     "Permission Denied", Toast.LENGTH_SHORT).show()
-                //добавить загрузку закешированных данных. сейчас будет выводиться просто фон и тост
+                // Добавить загрузку закешированных данных.
+                // Сейчас будет выводиться просто фон и тост
             }
         }
     }
 
-    /**проверка разрешения на определение местоположения*/
+    /** Проверка разрешения на определение местоположения */
     private fun checkPermissionForLocation(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -196,32 +198,36 @@ class MainActivity : AppCompatActivity() {
         } else true
     }
 
-    /**COROUTINS function, displays weather data*/
+    /** Функции корутины. Отображение данных о погоде */
     inner class WeatherTask:CoroutineScope{
         private var job: Job = Job()
         override val coroutineContext: CoroutineContext
-            get() = Dispatchers.Main + job //запуск кода в основном потоке
+            get() = Dispatchers.Main + job // Запуск кода в основном потоке
         fun cancel() {
             job.cancel()
         }
 
         fun execute() = launch {
                 onPreExecute()
-                val result = doInBackground() //запуск фонового потока без блоеирования основного
+                val result = doInBackground() // Запуск фонового потока без блокирования основного
                 onPostExecute(result)
         }
+
         private suspend fun doInBackground(): String = withContext(Dispatchers.IO) {
-            var response:String
-            var usedApi: HttpUrl
+            var response:String // Итоговая ссылка запроса
+            var usedApi: HttpUrl // Запрос, отправляемый на сервер
             try {
+                // Формирование запроса к серверу по названию выбранного города
                 if (CommonSettings.isCityNameChosen){
-                    cityName = CommonSettings.chosenCityName
-                    usedApi = CommonSettings.weatherMapAPIRequestByCityName(cityName)
+                    usedApi =
+                        CommonSettings.weatherMapAPIRequestByCityName(CommonSettings.chosenCityName)
                     stopLocationUpdates()
                 }
+                // Формирование запроса к серверу по определенным координатам
                 else usedApi = CommonSettings.weatherMapAPIRequestByLocation(
                         latitude.toString(), longitude.toString())
 
+                // Запись полученной ссылки запроса в итоговую переменную
                 response = okHttpHelper.GET(okHttpClient,usedApi).toString()
             } catch (exception: IOException) {
                 exception.printStackTrace()
@@ -231,11 +237,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         private suspend fun onPreExecute() {
-            //Запуск прогресс бара при подготовке данных от сервера
+            // Запуск прогресс бара при подготовке данных от сервера
             loaderProgressBar.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
-            delay(PROGRESS_BAR_DELAY) //задержка, чтобы при обновлении успевал прокрутиться прогресс бар
+            delay(PROGRESS_BAR_DELAY) // Задержка, чтобы при обновлении успевал прокрутиться прогресс бар
         }
 
         private fun onPostExecute(result: String) {
@@ -243,8 +249,10 @@ class MainActivity : AppCompatActivity() {
                 val gson = Gson()
                 val typeToken = object:TypeToken<OpenWeatherMap>(){}.type
 
+                // Получение данных о погоде с сервера
                 openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
 
+                // Отображение полученных данных на экране
                 addressTextView.text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
                 updatedAtTextView.text = "${CommonSettings.currentDate}"
                 skyDescriptionTextView.text = "${openWeatherMap.weather!![0].description}"
@@ -269,7 +277,7 @@ class MainActivity : AppCompatActivity() {
                 errorTextTextView.visibility = View.VISIBLE
             }
 
-            //Запись нового города в переменную
+            // Запись нового города в переменную
             if (!CommonSettings.isCityNameChosen)
             CommonSettings.newCityName = "${openWeatherMap.name}"
 

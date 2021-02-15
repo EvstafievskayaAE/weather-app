@@ -11,18 +11,20 @@ import kotlinx.android.synthetic.main.activity_choice_city.*
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
-    private var arrayAdapter:ArrayAdapter<String> ? = null
-    private lateinit var dataBaseHelper:DataBaseHelper
-    private var citiesListFromDb:MutableList<String> = arrayListOf()
-    private var citiesList:MutableList<String> = arrayListOf()
+    private lateinit var databaseHelper:DatabaseHelper // Объект класса для работы с БД
+
+    private var arrayAdapter:ArrayAdapter<String> ? = null // Адаптер для работы со списком
+    private var citiesListFromDb:MutableList<String> = arrayListOf() // Список городов из БД
+    private var citiesList:MutableList<String> = arrayListOf() // Список городов для отображения
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choice_city)
 
-        dataBaseHelper = DataBaseHelper(this)
+        databaseHelper = DatabaseHelper(this)
 
-        fillCitiesList()
+        fillCitiesList() // Заполнение списка городов
+
         arrayAdapter = ArrayAdapter(this, R.layout.custom_listview_item, citiesList)
 
         citiesListView?.adapter = arrayAdapter
@@ -31,10 +33,11 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        // Получение названия города, выбранного з отображенного списка
         var cityName:String = parent?.getItemAtPosition(position) as String
 
-        CommonSettings.isCityNameChosen = true
-        CommonSettings.chosenCityName = cityName
+        CommonSettings.isCityNameChosen = true // Установка флага в значение "город выбран"
+        CommonSettings.chosenCityName = cityName // Запись названия выбранного города в переменную
 
         Toast.makeText(applicationContext, "$cityName is chosen", Toast.LENGTH_LONG).show()
         startMainActivity()
@@ -42,15 +45,19 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
     /**Заполнение списка городов*/
     private fun fillCitiesList(){
-        //Получение начального списка городов из БД
-        citiesListFromDb = dataBaseHelper.getCitiesListFromDb()
+        // Получение начального списка городов из БД
+        citiesListFromDb = databaseHelper.getCitiesListFromDb()
 
-        //Запись в БД нового определенного по координатам города, если его еще нет там
-        if (!citiesListFromDb.contains(CommonSettings.newCityName))
-            dataBaseHelper.addNewCityToDb(CommonSettings.newCityName)
+        // Запись в БД нового определенного по координатам города,
+        // если город определен и его еще нет в списке
 
-        //Добавление всех городов из БД в список для отображения
-        citiesList = dataBaseHelper.getCitiesListFromDb()
+        if (CommonSettings.newCityName != ""
+            && !citiesListFromDb.contains(CommonSettings.newCityName)
+        )
+            databaseHelper.addNewCityToDb(CommonSettings.newCityName)
+
+        // Добавление всех городов из БД в список для отображения
+        citiesList = databaseHelper.getCitiesListFromDb()
     }
 
     /**Запуск основной активности */
