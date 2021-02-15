@@ -65,19 +65,26 @@ class MainActivity : AppCompatActivity() {
 
         mLocationRequest = LocationRequest()
 
-        if (CommonSettings.isCityNameChosen)
-            WeatherTask().execute()
-        else  if (checkPermissionForLocation(this)){
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        /**Вызов окна включения gps, если дано разрешение на определение местоположения,
+         * а город не выбран*/
+        if (checkPermissionForLocation(this)) {
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                !CommonSettings.isCityNameChosen)
                 buildAlertMessageNoGps()
             startLocationUpdates()
         }
 
+        /**Запуск корутины для отображения погоды, если город выбран*/
+        if (CommonSettings.isCityNameChosen)
+            WeatherTask().execute()
+
+        /**Запуск активности для выбора города*/
         val changeCityLink: TextView = changeCityLinkTextView
         changeCityLink.setOnClickListener {
             startChoiceCityActivity()
         }
 
+        /**Обновление погоды для установленного города*/
         val updateWeatherButton: Button = updateWeatherButton
         updateWeatherButton.setOnClickListener {
             WeatherTask().execute()
@@ -96,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("No") { dialog, id ->
                     dialog.cancel()
-                    /*finish()*/
+                    //добавить сообщение или загрузку закешированных данных. сейчас будет выводиться просто фон
                 }
         val alert: AlertDialog = builder.create()
         alert.show()
@@ -105,6 +112,7 @@ class MainActivity : AppCompatActivity() {
     /**Запуск активности выбора городов*/
     private fun startChoiceCityActivity(){
         val intent = Intent(this, ChoiceCityActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         startActivity(intent)
     }
 
@@ -168,6 +176,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@MainActivity,
                     "Permission Denied", Toast.LENGTH_SHORT).show()
+                //добавить загрузку закешированных данных. сейчас будет выводиться просто фон и тост
             }
         }
     }
