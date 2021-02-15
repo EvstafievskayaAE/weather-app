@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/choose_city"
-                android:textSize="15sp"  />
+                android:textSize="14sp"  />
 
             <Space
                 android:layout_width="wrap_content"
@@ -43,7 +43,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/address"
                 android:textSize="24sp" />
-
+            <Space
+                android:layout_width="wrap_content"
+                android:layout_height="10dp" />
             <TextView
                 android:id="@+id/updatedAtTextView"
                 android:layout_width="wrap_content"
@@ -113,7 +115,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feels_like"
-                        android:textSize="15sp"/>
+                        android:textSize="14sp"/>
                     <Space
                         android:layout_width="wrap_content"
                         android:layout_height="10dp" />
@@ -121,7 +123,8 @@
                         android:id="@+id/tempMinTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/min_temp" />
+                        android:text="@string/min_temp"
+                        android:textSize="14sp"/>
                     <Space
                         android:layout_width="wrap_content"
                         android:layout_height="10dp" />
@@ -129,7 +132,8 @@
                         android:id="@+id/tempMaxTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/max_temp" />
+                        android:text="@string/max_temp"
+                        android:textSize="14sp"/>
                 </LinearLayout>
 
             </LinearLayout>
@@ -145,7 +149,7 @@
                 android:layout_gravity="center"
                 android:background="#F81837E4"
                 android:text="@string/update_weather"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 app:backgroundTint="@color/blue"/>
         </LinearLayout>
 

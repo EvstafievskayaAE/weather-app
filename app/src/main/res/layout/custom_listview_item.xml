@@ -6,7 +6,7 @@
     android:layout_height="?android:attr/listPreferredItemHeightSmall"
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:textColor="@color/white"
-    android:textSize="15sp"
+    android:textSize="16sp"
     android:gravity="center_vertical"
     android:checkMark="?android:attr/listChoiceIndicatorSingle"
     android:checkMarkTint="@color/white"

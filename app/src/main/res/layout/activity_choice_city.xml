@@ -10,12 +10,14 @@
     <Space
         android:layout_width="wrap_content"
         android:layout_height="30dp" />
-<TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="@string/title"
-    android:gravity="center"
-    android:textSize="20sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/title"
+        android:textSize="20sp" />
+
     <Space
         android:layout_width="wrap_content"
         android:layout_height="20dp" />
