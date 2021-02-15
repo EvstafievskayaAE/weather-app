@@ -21,7 +21,7 @@ class DatabaseHelper(private var context: Context) : SQLiteOpenHelper(
             "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + COLUMN_ID +
                     " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " TEXT NOT NULL);"
 
-        private const val DROP_TABLE_QUERY = "DROP TABLE IF EXISTS " + DATABASE_NAME
+        private const val DROP_TABLE_QUERY = "DROP TABLE IF EXISTS $TABLE_NAME"
 
         private const val SELECT_QUERY = "SELECT * FROM $TABLE_NAME ORDER BY $COLUMN_NAME"
 
