@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.FileWork
 
 import android.content.Context
 import java.io.FileInputStream
@@ -10,7 +10,11 @@ object FileWorkHelper{
     fun addLineToFile(addedLine: String, fileName: String, context: Context) {
         val fileOutputStream: FileOutputStream=
             context.openFileOutput(fileName, Context.MODE_PRIVATE or Context.MODE_APPEND)
-        var fileText = readLinesFromFile(fileName, context)
+        var fileText =
+            readLinesFromFile(
+                fileName,
+                context
+            )
 
         if(!fileText.contains(addedLine))
             fileOutputStream.write("${addedLine}\n".toByteArray())

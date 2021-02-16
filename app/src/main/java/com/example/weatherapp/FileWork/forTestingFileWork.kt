@@ -1,12 +1,13 @@
-package com.example.weatherapp
+package com.example.weatherapp.FileWork
 
 import java.io.File
 import java.io.FileWriter
 
 
 fun main(){
-    var list =readFileAsLinesUsingUseLines("test.txt")
-    addListToFile(list,"TEST2.txt")
+    var list =
+        readFileAsLinesUsingUseLines("test.txt")
+    addListToFile(list, "TEST2.txt")
     var a:String = list.get(0)
     }
 

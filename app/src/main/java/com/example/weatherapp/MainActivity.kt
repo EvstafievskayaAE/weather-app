@@ -19,9 +19,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.Model.OpenWeatherMap
-import com.example.weatherapp.ProjectConstants.PROGRESS_BAR_DELAY
-import com.example.weatherapp.ProjectConstants.REQUEST_GPS_CODE
-import com.example.weatherapp.ProjectConstants.REQUEST_PERMISSION_LOCATION
+import com.example.weatherapp.ProjectSettings.CommonSettings
+import com.example.weatherapp.ProjectSettings.ProjectConstants.PROGRESS_BAR_DELAY
+import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_GPS_CODE
+import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -51,11 +52,16 @@ class MainActivity : AppCompatActivity() {
     // Сервис для получения данных о погоде
     private var openWeatherMap = OpenWeatherMap()
 
+    // Для работы с БД
+    private lateinit var databaseHelper:DatabaseHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         mainContainer.visibility = View.GONE
+
+        databaseHelper = DatabaseHelper(this)
 
        /* CommonSettings.isCityNameChosen=false*/ // Будет нужно, если убрать автоматический переход со второй активности
         locationManager =
@@ -101,8 +107,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 .setNegativeButton("No") { dialog, id ->
                     dialog.cancel()
-                    // Добавить сообщение или загрузку закешированных данных.
-                    // Сейчас будет выводиться просто фон
+                    // TODO Добавить сообщение или загрузку закешированных данных.
+                    //  Сейчас будет выводиться просто фон
                 }
         val alert: AlertDialog = builder.create()
         alert.show()
@@ -177,8 +183,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@MainActivity,
                     "Permission Denied", Toast.LENGTH_SHORT).show()
-                // Добавить загрузку закешированных данных.
-                // Сейчас будет выводиться просто фон и тост
+                // TODO Добавить загрузку закешированных данных.
+                //  Сейчас будет выводиться просто фон и тост
             }
         }
     }
@@ -220,7 +226,8 @@ class MainActivity : AppCompatActivity() {
                 // Формирование запроса к серверу по названию выбранного города
                 if (CommonSettings.isCityNameChosen){
                     usedApi =
-                        CommonSettings.weatherMapAPIRequestByCityName(CommonSettings.chosenCityName)
+                        CommonSettings.weatherMapAPIRequestByCityName(
+                            CommonSettings.chosenCityName)
                     stopLocationUpdates()
                 }
                 // Формирование запроса к серверу по определенным координатам
@@ -252,23 +259,10 @@ class MainActivity : AppCompatActivity() {
                 // Получение данных о погоде с сервера
                 openWeatherMap = gson.fromJson<OpenWeatherMap>(result, typeToken)
 
-                // Отображение полученных данных на экране
-                addressTextView.text = "${openWeatherMap.name},${openWeatherMap.sys!!.country}"
-                updatedAtTextView.text = "${CommonSettings.currentDate}"
-                skyDescriptionTextView.text = "${openWeatherMap.weather!![0].description}"
-                tempTextView.text = "${openWeatherMap.main!!.temp.toInt()}°C"
-                feelsLikeTextView.text = "feels like: ${openWeatherMap.main!!.feels_like} °C"
-                tempMinTextView.text = "min temp: ${openWeatherMap.main!!.temp_min} °C"
-                tempMaxTextView.text = "max temp: ${openWeatherMap.main!!.temp_max} °C"
-                sunriseTextView.text =
-                        CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
-                sunsetTextView.text =
-                        CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
-                windTextView.text = "${openWeatherMap.wind!!.speed} м/с"
-
-                Picasso.with(this@MainActivity)
-                    .load(CommonSettings.getImage(openWeatherMap.weather!![0].icon!!))
-                    .into(imageView)
+                /**Запись полученных данных в переменные*/
+                writeOpenWeatherMapDataToWeatherDataForDisplay()
+                /*CacheDataClass(this@MainActivity).getCacheDataFromDB()*//** Получение кэшированных данных из БД */
+                displayWeatherData() // Отображение погоды на экране
 
                 loaderProgressBar.visibility = View.GONE
                 mainContainer.visibility = View.VISIBLE
@@ -282,5 +276,47 @@ class MainActivity : AppCompatActivity() {
             CommonSettings.newCityName = "${openWeatherMap.name}"
 
         }
+    }
+
+    /** Запись данных о погоде, полученных с сервера, в переменные */
+    fun writeOpenWeatherMapDataToWeatherDataForDisplay(){
+        WeatherDataForDisplay.cityName = openWeatherMap.name
+        WeatherDataForDisplay.country = openWeatherMap.sys!!.country
+        WeatherDataForDisplay.currentDate = CommonSettings.currentDate
+        WeatherDataForDisplay. skyDescription = openWeatherMap.weather!![0].description
+        WeatherDataForDisplay.temperature = openWeatherMap.main!!.temp
+        WeatherDataForDisplay.feelsLike = openWeatherMap.main!!.feels_like
+        WeatherDataForDisplay.minTemperature = openWeatherMap.main!!.temp_min
+        WeatherDataForDisplay. maxTemperature = openWeatherMap.main!!.temp_max
+        WeatherDataForDisplay.sunrise =  CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunrise)
+        WeatherDataForDisplay.sunset = CommonSettings.convertUnixTimeStampToDateTime(openWeatherMap.sys!!.sunset)
+        WeatherDataForDisplay.windSpeed = openWeatherMap.wind!!.speed
+    }
+
+    /** Отображение данных о погоде на экране */
+    fun displayWeatherData(){
+        addressTextView.text = "${WeatherDataForDisplay.cityName}, ${WeatherDataForDisplay.country}"
+        updatedAtTextView.text = WeatherDataForDisplay.currentDate
+        skyDescriptionTextView.text = "${WeatherDataForDisplay.skyDescription}"
+        tempTextView.text = "${WeatherDataForDisplay.temperature.toInt()}°C"
+        feelsLikeTextView.text = "feels like: ${WeatherDataForDisplay.feelsLike} °C"
+        tempMinTextView.text = "min temp: ${WeatherDataForDisplay.minTemperature} °C"
+        tempMaxTextView.text = "max temp: ${WeatherDataForDisplay.maxTemperature} °C"
+        sunriseTextView.text = WeatherDataForDisplay.sunrise
+        sunsetTextView.text = WeatherDataForDisplay.sunset
+        windTextView.text = "${WeatherDataForDisplay.windSpeed} м/с"
+
+        Picasso.with(this@MainActivity)
+            .load(CommonSettings.getImage(openWeatherMap.weather!![0].icon!!))
+            .into(imageView)
+    }
+
+    override fun onDestroy() {
+
+        /*// Запись кэшированных данных в таблицу БД. TODO Переместить. Сейчас записывает не самые последние данные
+        databaseHelper.updateCacheTable(WeatherDataForDisplay.cityName, WeatherDataForDisplay.country, WeatherDataForDisplay.currentDate,
+            WeatherDataForDisplay.skyDescription, WeatherDataForDisplay.temperature, WeatherDataForDisplay.feelsLike, WeatherDataForDisplay.minTemperature,
+            WeatherDataForDisplay.maxTemperature, WeatherDataForDisplay.sunrise, WeatherDataForDisplay.sunset, WeatherDataForDisplay.windSpeed)*/
+        super.onDestroy()
     }
 }
