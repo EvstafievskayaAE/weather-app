@@ -5,6 +5,8 @@ import okhttp3.HttpUrl
 import java.text.SimpleDateFormat
 import java.util.*
 
+/** Первоначальные настройки значений при запуке проекта */
+
 object CommonSettings {
     var isCityNameChosen = false // Значение флага "Город не выбран"
     var chosenCityName = "" // Название города, выбранного из списка
@@ -43,12 +45,12 @@ object CommonSettings {
         return dateFormat.format(date)
     }
 
-    /** Адрес получения иконок weathermap*/
+    /** Адрес получения иконок weathermap */
     fun getImage(icon:String):String{
         return "https://api.openweathermap.org/img/w/${icon}.png"
     }
 
-    /** Формат отображение текущей даты получения данных о погоде*/
+    /** Формат отображение текущей даты получения данных о погоде */
     val currentDate:String
     get() {
         val dateFormat = SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.ENGLISH)

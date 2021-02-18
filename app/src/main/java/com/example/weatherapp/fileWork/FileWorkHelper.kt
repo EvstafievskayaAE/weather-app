@@ -1,4 +1,4 @@
-package com.example.weatherapp.FileWork
+package com.example.weatherapp.fileWork
 
 import android.content.Context
 import java.io.FileInputStream

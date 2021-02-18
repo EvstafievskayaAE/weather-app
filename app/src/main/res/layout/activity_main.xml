@@ -60,8 +60,7 @@
             <ImageView
                 android:id="@+id/imageView"
                 android:layout_width="94dp"
-                android:layout_height="93dp"
-                android:src="@drawable/ic_sunny_weather" />
+                android:layout_height="93dp" />
 
             <TextView
                 android:id="@+id/skyDescriptionTextView"

@@ -1,5 +1,6 @@
 package com.example.weatherapp.ProjectSettings
 
+/** Перечисление используемых в приложении констант */
 object ProjectConstants {
 
     // Персональный ключ для работы с openweathermap

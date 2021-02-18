@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.Activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -7,12 +7,15 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.weatherapp.workWithDatabase.CitiesClass
+import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.example.weatherapp.ProjectSettings.CommonSettings
+import com.example.weatherapp.R
 import kotlinx.android.synthetic.main.activity_choice_city.*
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
-    private lateinit var databaseHelper:DatabaseHelper // Объект класса для работы с БД
+    private lateinit var databaseHelper: DatabaseHelper // Объект класса для работы с БД
 
     private var arrayAdapter:ArrayAdapter<String> ? = null // Адаптер для работы со списком
     private var citiesListFromDb:MutableList<String> = arrayListOf() // Список городов из БД
@@ -47,18 +50,17 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     /**Заполнение списка городов*/
     private fun fillCitiesList(){
         // Получение начального списка городов из БД
-        citiesListFromDb = databaseHelper.getCitiesListFromDb()
+        citiesListFromDb = CitiesClass(this).getCitiesListFromDb()
 
         // Запись в БД нового определенного по координатам города,
         // если город определен и его еще нет в списке
 
         if (CommonSettings.newCityName != ""
-            && !citiesListFromDb.contains(CommonSettings.newCityName)
-        )
-            databaseHelper.addNewCityToDb(CommonSettings.newCityName)
+            && !citiesListFromDb.contains(CommonSettings.newCityName))
+            CitiesClass(this).addNewCityToDb(CommonSettings.newCityName)
 
         // Добавление всех городов из БД в список для отображения
-        citiesList = databaseHelper.getCitiesListFromDb()
+        citiesList = CitiesClass(this).getCitiesListFromDb()
     }
 
     /**Запуск основной активности */
@@ -66,6 +68,5 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
-        finish()
     }
 }
