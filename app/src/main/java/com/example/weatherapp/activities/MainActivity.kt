@@ -1,4 +1,4 @@
-package com.example.weatherapp.Activities
+package com.example.weatherapp.activities
 
 import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -19,13 +19,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.*
-import com.example.weatherapp.ProjectSettings.CommonSettings
-import com.example.weatherapp.ProjectSettings.ProjectConstants.PROGRESS_BAR_DELAY
-import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_GPS_CODE
-import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
-import com.example.weatherapp.ProjectSettings.WeatherDataForDisplay
+import com.example.weatherapp.projectSettings.CommonSettings
+import com.example.weatherapp.projectSettings.ProjectConstants.PROGRESS_BAR_DELAY
+import com.example.weatherapp.projectSettings.ProjectConstants.REQUEST_GPS_CODE
+import com.example.weatherapp.projectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
+import com.example.weatherapp.projectSettings.WeatherDataForDisplay
 import com.example.weatherapp.R
-import com.example.weatherapp.Model.OpenWeatherMap
+import com.example.weatherapp.model.OpenWeatherMap
 import com.example.weatherapp.workWithDatabase.CacheDataClass
 import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.google.android.gms.location.*

@@ -1,6 +1,6 @@
-package com.example.weatherapp.ProjectSettings
+package com.example.weatherapp.projectSettings
 
-import com.example.weatherapp.ProjectSettings.ProjectConstants.weatherMapAPI
+import com.example.weatherapp.projectSettings.ProjectConstants.weatherMapAPI
 import okhttp3.HttpUrl
 import java.text.SimpleDateFormat
 import java.util.*

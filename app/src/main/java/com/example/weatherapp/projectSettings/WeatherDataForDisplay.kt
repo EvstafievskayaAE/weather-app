@@ -1,4 +1,4 @@
-package com.example.weatherapp.ProjectSettings
+package com.example.weatherapp.projectSettings
 
 /** Переменные для отображения данных о погоде */
 object WeatherDataForDisplay {

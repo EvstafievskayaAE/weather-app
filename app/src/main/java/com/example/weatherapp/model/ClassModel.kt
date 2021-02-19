@@ -1,4 +1,4 @@
-package com.example.weatherapp.Model
+package com.example.weatherapp.model
 
 class Weather(var cityId:Int, var main:String?, var description:String?, var icon:String?)
 
