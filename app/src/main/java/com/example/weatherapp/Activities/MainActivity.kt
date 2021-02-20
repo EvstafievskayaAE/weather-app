@@ -121,13 +121,19 @@ class MainActivity : AppCompatActivity() {
         alert.show()
     }
 
-    /** Вывод диалогового окна повторного вызова функции отображения данных при возобновлении интернет-соединения */
+    /** Вывод диалогового окна повторного вызова функции отображения данных
+     * при возобновлении интернет-соединения */
+
     private fun buildAlertDialogWhenNoInternet() {
         val builder = AlertDialog.Builder(this)
         builder.setMessage("Please, check your internet connection and try again")
             .setCancelable(false)
             .setPositiveButton("TRY AGAIN") { dialog, id ->
                 WeatherTask().execute()
+            }
+            .setNegativeButton("cancel") { dialog, id ->
+                dialog.cancel()
+                displayCachedDataIfAny() // Отображение закэшированных данных, если они есть
             }
         val alert: AlertDialog = builder.create()
         alert.show()
@@ -147,9 +153,6 @@ class MainActivity : AppCompatActivity() {
     private fun startLocationUpdates() {
         // Установка высокой точности определения местоположения (мобильная связь, wi-fi и gps)
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        /*mLocationRequest!!.setInterval(INTERVAL)
-        mLocationRequest!!.setFastestInterval(FASTEST_INTERVAL)*/  //если понадобится автоматическое обновление координат
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -373,11 +376,11 @@ class MainActivity : AppCompatActivity() {
         mainContainer.visibility = View.VISIBLE
     }
 
-    
+    /** Сохранение данных при свертывании активности */
+    override fun onPause() {
+        super.onPause()
 
-    override fun onDestroy() {
-
-        // Запись кэшированных данных в таблицу БД. TODO Переместить. Сейчас записывает не самые последние данные
+        // Запись кэшированных данных в таблицу БД.
         if (WeatherDataForDisplay.cityName != null)
             CacheDataClass(this).updateCacheTable(
                 WeatherDataForDisplay.cityName,
@@ -392,6 +395,6 @@ class MainActivity : AppCompatActivity() {
                 WeatherDataForDisplay.sunset,
                 WeatherDataForDisplay.windSpeed
             )
-        super.onDestroy()
     }
+
 }
