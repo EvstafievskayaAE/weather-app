@@ -3,6 +3,7 @@ package com.example.weatherapp.workWithDatabase
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.R
 
 /** Класс для работы со списком городов и БД*/
@@ -10,6 +11,9 @@ class CitiesClass(var context: Context) : DatabaseHelper(context) {
 
     /** Относящиеся к таблице городов константы */
     companion object {
+        /* Список городов из БД */
+        private var citiesListFromDb:MutableList<String> = arrayListOf()
+
         /* Названия полей таблицы для хранения списка городов */
 
         const val TABLE_NAME = "cities"
@@ -42,8 +46,17 @@ class CitiesClass(var context: Context) : DatabaseHelper(context) {
     fun addNewCityToDb(cityName: String) {
         val database = this.writableDatabase
         val contentValues = ContentValues()
-        contentValues.put(COLUMN_NAME, cityName)
-        database.insert(TABLE_NAME, null, contentValues)
+
+        // Получение начального списка городов из БД
+        citiesListFromDb = getCitiesListFromDb()
+
+        // Запись в БД нового определенного по координатам города,
+        // если город определен и его еще нет в списке
+
+        if (cityName != "" && !citiesListFromDb.contains(cityName)) {
+            contentValues.put(COLUMN_NAME, cityName)
+            database.insert(TABLE_NAME, null, contentValues)
+        }
     }
 
     /** Получение списка всех городов из базы данных */

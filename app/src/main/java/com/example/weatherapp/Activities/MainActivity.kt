@@ -27,6 +27,7 @@ import com.example.weatherapp.ProjectSettings.WeatherDataForDisplay
 import com.example.weatherapp.R
 import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.workWithDatabase.CacheDataClass
+import com.example.weatherapp.workWithDatabase.CitiesClass
 import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.google.android.gms.location.*
 import com.google.gson.Gson
@@ -72,20 +73,15 @@ class MainActivity : AppCompatActivity() {
         /* CommonSettings.isCityNameChosen=false*/ // Будет нужно, если убрать автоматический переход со второй активности
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
+        mLocationRequest = LocationRequest()
+
         /** Запуск корутины для отображения погоды, если город выбран */
         if (CommonSettings.isCityNameChosen)
             WeatherTask().execute()
-        else{
-            /** Вызов окна включения gps, если дано разрешение на определение местоположения,
-             * а город не выбран */
-            mLocationRequest = LocationRequest()
-            checkPermissionForLocation(this)
-            if (isLocationPermissionGranted) {
-                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                    buildAlertMessageNoGps()
-                startLocationUpdates()
-            }
-        }
+
+        /** Вызов окна включения gps, если дано разрешение на определение местоположения,
+         * а город не выбран */
+        else displayWeatherForCurrentCity()
 
         /** Запуск активности для выбора города */
         val changeCityLink: TextView = changeCityLinkTextView
@@ -97,6 +93,19 @@ class MainActivity : AppCompatActivity() {
         val updateWeatherButton: Button = updateWeatherButton
         updateWeatherButton.setOnClickListener {
             WeatherTask().execute()
+        }
+    }
+
+    /** Отображение погоды для города, определенного по координатам */
+    private fun displayWeatherForCurrentCity(){
+        // Проверка наличия разрешения на определение местоположения
+        checkPermissionForLocation(this)
+        if (isLocationPermissionGranted) {
+            // Проверка, включен ли gps
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                buildAlertMessageNoGps()
+            // Определение координат местоположения и отображение данных
+            startLocationUpdates()
         }
     }
 
@@ -113,8 +122,7 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("No") { dialog, id ->
                 dialog.cancel()
-                errorTextTextView.setText(
-                    "For displaying a weather in your city, please, turn on gps")
+                errorTextTextView.text = getString(R.string.turn_on_gps)
                 displayCachedDataIfAny() // Отображение закэшированных данных, если они есть
             }
         val alert: AlertDialog = builder.create()
@@ -153,6 +161,9 @@ class MainActivity : AppCompatActivity() {
     private fun startLocationUpdates() {
         // Установка высокой точности определения местоположения (мобильная связь, wi-fi и gps)
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+       /* while (latitude==null || longitude == null)
+            Toast.makeText(applicationContext, "WAIT, PLEASE", Toast.LENGTH_LONG).show()*/
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -213,8 +224,7 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity,
                     "Permission Denied", Toast.LENGTH_SHORT
                 ).show()
-                errorTextTextView.setText("For displaying a weather in your city, " +
-                        "please, give a location permission")
+                errorTextTextView.text = getString(R.string.give_location_permission)
                 displayCachedDataIfAny() // Отображение закэшированных данных, если они есть
             }
         }
@@ -230,16 +240,17 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(
                     this, arrayOf(ACCESS_FINE_LOCATION),
                     REQUEST_PERMISSION_LOCATION)
-                    else  isLocationPermissionGranted = true}
-
+                    else  isLocationPermissionGranted = true
+        }
     }
 
     /** Проверка, есть ли закэшированные данные, и отображение, если есть*/
     private fun displayCachedDataIfAny() {
-
+    // Проверка, есть ли данные для отображения сейчас
         if (WeatherDataForDisplay.cityName != null)
             displayWeatherData()
         else {
+            // Получение кэшированных данных из БД, если они там есть
             if (!CacheDataClass(this).isCacheTableEmpty()) {
                 CacheDataClass(this).getCacheDataFromDB()
                 displayWeatherData()
@@ -318,16 +329,23 @@ class MainActivity : AppCompatActivity() {
                     .into(imageView)
 
                 // Запись нового города в переменную
-                if (!CommonSettings.isCityNameChosen)
+                if (!CommonSettings.isCityNameChosen) {
                     CommonSettings.newCityName = "${openWeatherMap.name}"
+                    CitiesClass(this@MainActivity).addNewCityToDb(CommonSettings.newCityName)
+                }
 
             } catch (exception: Exception) {
                 loaderProgressBar.visibility = View.GONE
-               /* errorTextTextView.visibility = View.VISIBLE*/
+
+                /** Исключение возникает, если корутина не может получить данные.
+                 * Первая причина - отсутствие интернета.
+                 * Вторая - отсутствие разрешения на определение местоположения
+                 * Третья - разрешение дано, но выключен gps*/
+                if (!InternetConnection(this@MainActivity).isNetworkConnected())
                 buildAlertDialogWhenNoInternet()
+                else displayWeatherForCurrentCity()
+
             }
-
-
         }
     }
 

@@ -18,7 +18,6 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     private lateinit var databaseHelper: DatabaseHelper // Объект класса для работы с БД
 
     private var arrayAdapter:ArrayAdapter<String> ? = null // Адаптер для работы со списком
-    private var citiesListFromDb:MutableList<String> = arrayListOf() // Список городов из БД
     private var citiesList:MutableList<String> = arrayListOf() // Список городов для отображения
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +26,8 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
         databaseHelper = DatabaseHelper(this)
 
-        fillCitiesList() // Заполнение списка городов
+        // Добавление всех городов из БД в список для отображения
+        citiesList = CitiesClass(this).getCitiesListFromDb()
 
         arrayAdapter = ArrayAdapter(this, R.layout.custom_listview_item, citiesList)
 
@@ -36,8 +36,9 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         citiesListView?.onItemClickListener = this
     }
 
+    /** Действия при выборе города из списка */
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        // Получение названия города, выбранного з отображенного списка
+        // Получение названия города, выбранного из отображенного списка
         var cityName:String = parent?.getItemAtPosition(position) as String
 
         CommonSettings.isCityNameChosen = true // Установка флага в значение "город выбран"
@@ -45,22 +46,6 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
 
         Toast.makeText(applicationContext, "$cityName is chosen", Toast.LENGTH_LONG).show()
         startMainActivity()
-    }
-
-    /**Заполнение списка городов*/
-    private fun fillCitiesList(){
-        // Получение начального списка городов из БД
-        citiesListFromDb = CitiesClass(this).getCitiesListFromDb()
-
-        // Запись в БД нового определенного по координатам города,
-        // если город определен и его еще нет в списке
-
-        if (CommonSettings.newCityName != ""
-            && !citiesListFromDb.contains(CommonSettings.newCityName))
-            CitiesClass(this).addNewCityToDb(CommonSettings.newCityName)
-
-        // Добавление всех городов из БД в список для отображения
-        citiesList = CitiesClass(this).getCitiesListFromDb()
     }
 
     /**Запуск основной активности */

@@ -18,6 +18,9 @@
     <string name="title">Please, choose city to display the weather</string>
     <string name="update_weather">update weather</string>
     <string name="feels_like">feels like: 10 °C</string>
+    <string name="turn_on_gps">For displaying a weather in your city, please, turn on gps</string>
+    <string name="give_location_permission">\"For displaying a weather in your city,
+        please, give a location permission \"</string>
     <string-array name="cities">
         <item>Tokyo</item>
         <item>Moscow</item>
