@@ -289,4 +289,23 @@
         android:visibility="gone"
         android:text="@string/error_text"
         android:gravity="center"/>
+    <LinearLayout
+        android:id="@+id/waitContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/waitTextTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/wait_please"
+            android:gravity="center"/>
+        <ImageView
+            android:id="@+id/animationView"
+            android:layout_width="100dp"
+            android:layout_height="100dp" />
+    </LinearLayout>
 </RelativeLayout>

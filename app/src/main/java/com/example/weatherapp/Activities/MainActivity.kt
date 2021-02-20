@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.bumptech.glide.Glide
 import com.example.weatherapp.*
 import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.ProjectSettings.ProjectConstants.PROGRESS_BAR_DELAY
@@ -162,8 +163,14 @@ class MainActivity : AppCompatActivity() {
         // Установка высокой точности определения местоположения (мобильная связь, wi-fi и gps)
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
 
-       /* while (latitude==null || longitude == null)
-            Toast.makeText(applicationContext, "WAIT, PLEASE", Toast.LENGTH_LONG).show()*/
+        if (latitude==null || longitude == null)
+        {
+            Glide.with(this)
+                .load(R.drawable.animation)
+                .into(animationView);
+
+            waitContainer.visibility = View.VISIBLE
+        }
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -303,6 +310,7 @@ class MainActivity : AppCompatActivity() {
 
         private suspend fun onPreExecute() {
             // Запуск прогресс бара при подготовке данных от сервера
+            waitContainer.visibility = View.GONE
             loaderProgressBar.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
