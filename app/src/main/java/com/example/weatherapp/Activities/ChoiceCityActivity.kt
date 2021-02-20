@@ -1,4 +1,4 @@
-package com.example.weatherapp.activities
+package com.example.weatherapp.Activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp.workWithDatabase.CitiesClass
 import com.example.weatherapp.workWithDatabase.DatabaseHelper
-import com.example.weatherapp.projectSettings.CommonSettings
+import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.R
 import kotlinx.android.synthetic.main.activity_choice_city.*
 

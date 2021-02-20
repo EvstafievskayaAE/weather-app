@@ -1,4 +1,4 @@
-package com.example.weatherapp.activities
+package com.example.weatherapp.Activities
 
 import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -19,13 +19,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.weatherapp.*
-import com.example.weatherapp.projectSettings.CommonSettings
-import com.example.weatherapp.projectSettings.ProjectConstants.PROGRESS_BAR_DELAY
-import com.example.weatherapp.projectSettings.ProjectConstants.REQUEST_GPS_CODE
-import com.example.weatherapp.projectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
-import com.example.weatherapp.projectSettings.WeatherDataForDisplay
+import com.example.weatherapp.ProjectSettings.CommonSettings
+import com.example.weatherapp.ProjectSettings.ProjectConstants.PROGRESS_BAR_DELAY
+import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_GPS_CODE
+import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
+import com.example.weatherapp.ProjectSettings.WeatherDataForDisplay
 import com.example.weatherapp.R
-import com.example.weatherapp.model.OpenWeatherMap
+import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.workWithDatabase.CacheDataClass
 import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.google.android.gms.location.*
@@ -116,6 +116,18 @@ class MainActivity : AppCompatActivity() {
                 errorTextTextView.setText(
                     "For displaying a weather in your city, please, turn on gps")
                 displayCachedDataIfAny() // Отображение закэшированных данных, если они есть
+            }
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    /** Вывод диалогового окна повторного вызова функции отображения данных при возобновлении интернет-соединения */
+    private fun buildAlertDialogWhenNoInternet() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage("Please, check your internet connection and try again")
+            .setCancelable(false)
+            .setPositiveButton("TRY AGAIN") { dialog, id ->
+                WeatherTask().execute()
             }
         val alert: AlertDialog = builder.create()
         alert.show()
@@ -308,7 +320,8 @@ class MainActivity : AppCompatActivity() {
 
             } catch (exception: Exception) {
                 loaderProgressBar.visibility = View.GONE
-                errorTextTextView.visibility = View.VISIBLE
+               /* errorTextTextView.visibility = View.VISIBLE*/
+                buildAlertDialogWhenNoInternet()
             }
 
 
@@ -359,6 +372,8 @@ class MainActivity : AppCompatActivity() {
         loaderProgressBar.visibility = View.GONE
         mainContainer.visibility = View.VISIBLE
     }
+
+    
 
     override fun onDestroy() {
 

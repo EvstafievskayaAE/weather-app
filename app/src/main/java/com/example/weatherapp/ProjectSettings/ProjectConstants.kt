@@ -1,4 +1,4 @@
-package com.example.weatherapp.projectSettings
+package com.example.weatherapp.ProjectSettings
 
 /** Перечисление используемых в приложении констант */
 object ProjectConstants {

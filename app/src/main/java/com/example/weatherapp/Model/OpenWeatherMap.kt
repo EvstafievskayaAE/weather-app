@@ -1,4 +1,4 @@
-package com.example.weatherapp.model
+package com.example.weatherapp.Model
 
 class OpenWeatherMap {
     var location: Location?=null

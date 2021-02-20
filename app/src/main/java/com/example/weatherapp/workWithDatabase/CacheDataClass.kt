@@ -3,7 +3,7 @@ package com.example.weatherapp.workWithDatabase
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import com.example.weatherapp.projectSettings.WeatherDataForDisplay
+import com.example.weatherapp.ProjectSettings.WeatherDataForDisplay
 
 /** Класс для работы с кэшированными данными и БД */
 class CacheDataClass(context: Context) : DatabaseHelper(context) {
