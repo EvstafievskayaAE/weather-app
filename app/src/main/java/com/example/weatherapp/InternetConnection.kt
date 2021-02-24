@@ -29,7 +29,8 @@ class InternetConnection(var context: Context) {
                 if (network != null) {
                     val networkCapabilities =
                         connectivityManager.getNetworkCapabilities(network)
-                    return networkCapabilities!!.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(
+                    return networkCapabilities!!.hasTransport(
+                        NetworkCapabilities.TRANSPORT_CELLULAR) || networkCapabilities.hasTransport(
                         NetworkCapabilities.TRANSPORT_WIFI
                     )
                 }
