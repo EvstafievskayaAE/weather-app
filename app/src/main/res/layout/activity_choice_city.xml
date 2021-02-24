@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,6 +13,17 @@
         android:layout_height="30dp" />
 
     <TextView
+        android:id="@+id/findMyCityLinkTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_gravity="center"
+        android:text="@string/find_my_city"
+        android:textSize="14sp" />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -21,10 +33,25 @@
     <Space
         android:layout_width="wrap_content"
         android:layout_height="20dp" />
+
     <ListView
         android:id="@+id/citiesListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="475dp" />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp" />
+
+    <Button
+        android:id="@+id/findMyCityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_gravity="center"
+        android:background="#F81837E4"
+        android:text="@string/find_my_city"
+        android:textSize="14sp"
+        app:backgroundTint="@color/blue"
+        android:visibility="invisible"/>
 
 </LinearLayout>

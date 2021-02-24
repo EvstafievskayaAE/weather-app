@@ -3,7 +3,6 @@ package com.example.weatherapp.workWithDatabase
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.R
 
 /** Класс для работы со списком городов и БД*/

@@ -2,15 +2,12 @@ package com.example.weatherapp.Activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.weatherapp.workWithDatabase.CitiesClass
-import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.R
+import com.example.weatherapp.workWithDatabase.CitiesClass
+import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import kotlinx.android.synthetic.main.activity_choice_city.*
 
 class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
@@ -34,6 +31,13 @@ class ChoiceCityActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
         citiesListView?.adapter = arrayAdapter
         citiesListView?.choiceMode = ListView.CHOICE_MODE_SINGLE
         citiesListView?.onItemClickListener = this
+
+        /** Поиск местоположения и погоды при нажатии ссылки */
+        val findMyCityLinkTextView: TextView = findMyCityLinkTextView
+        findMyCityLinkTextView.setOnClickListener {
+            CommonSettings.isCityNameChosen = false // Установка флага в значение "город не выбран"
+            startMainActivity()
+        }
     }
 
     /** Действия при выборе города из списка */

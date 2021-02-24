@@ -19,21 +19,23 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.bumptech.glide.Glide
-import com.example.weatherapp.*
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
+import com.example.weatherapp.InternetConnection
+import com.example.weatherapp.Model.OpenWeatherMap
+import com.example.weatherapp.OkHttpHelper
 import com.example.weatherapp.ProjectSettings.CommonSettings
 import com.example.weatherapp.ProjectSettings.ProjectConstants.PROGRESS_BAR_DELAY
 import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_GPS_CODE
 import com.example.weatherapp.ProjectSettings.ProjectConstants.REQUEST_PERMISSION_LOCATION
 import com.example.weatherapp.ProjectSettings.WeatherDataForDisplay
 import com.example.weatherapp.R
-import com.example.weatherapp.Model.OpenWeatherMap
 import com.example.weatherapp.workWithDatabase.CacheDataClass
 import com.example.weatherapp.workWithDatabase.CitiesClass
 import com.example.weatherapp.workWithDatabase.DatabaseHelper
 import com.google.android.gms.location.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import okhttp3.HttpUrl
@@ -71,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 
         databaseHelper = DatabaseHelper(this)
 
-        /* CommonSettings.isCityNameChosen=false*/ // Будет нужно, если убрать автоматический переход со второй активности
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mLocationRequest = LocationRequest()
@@ -97,18 +98,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Отображение погоды для города, определенного по координатам */
-    private fun displayWeatherForCurrentCity(){
-        // Проверка наличия разрешения на определение местоположения
-        checkPermissionForLocation(this)
-        if (isLocationPermissionGranted) {
-            // Проверка, включен ли gps
-            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
-                buildAlertMessageNoGps()
-            // Определение координат местоположения и отображение данных
-            startLocationUpdates()
-        }
+    /** Запуск активности выбора городов */
+    private fun startChoiceCityActivity() {
+        val intent = Intent(this, ChoiceCityActivity::class.java)
+
+        // Флаг для очистки истории переходов между активностями
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+
+        startActivity(intent)
     }
+
+    /** ДИАЛОГОВЫЕ ОКНА */
 
     /** Вывод диалогового окна включения gps */
     private fun buildAlertMessageNoGps() {
@@ -120,6 +120,7 @@ class MainActivity : AppCompatActivity() {
                     Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     , REQUEST_GPS_CODE
                 )
+                showWaitContainer() // Загрузка анимации ожидания
             }
             .setNegativeButton("No") { dialog, id ->
                 dialog.cancel()
@@ -138,7 +139,7 @@ class MainActivity : AppCompatActivity() {
         builder.setMessage("Please, check your internet connection and try again")
             .setCancelable(false)
             .setPositiveButton("TRY AGAIN") { dialog, id ->
-                WeatherTask().execute()
+                WeatherTask().execute() // Вызов корутины для отображения погоды
             }
             .setNegativeButton("cancel") { dialog, id ->
                 dialog.cancel()
@@ -148,29 +149,13 @@ class MainActivity : AppCompatActivity() {
         alert.show()
     }
 
-    /** Запуск активности выбора городов */
-    private fun startChoiceCityActivity() {
-        val intent = Intent(this, ChoiceCityActivity::class.java)
 
-        // Флаг для очистки истории переходов между активностями
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-
-        startActivity(intent)
-    }
+    /** ОПРЕДЕЛЕНИЕ МЕСТОПОЛОЖЕНИЯ */
 
     /** Запуск обновления координат местоположения */
     private fun startLocationUpdates() {
         // Установка высокой точности определения местоположения (мобильная связь, wi-fi и gps)
         mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-        if (latitude==null || longitude == null)
-        {
-            Glide.with(this)
-                .load(R.drawable.animation)
-                .into(animationView);
-
-            waitContainer.visibility = View.VISIBLE
-        }
 
         val builder = LocationSettingsRequest.Builder()
         builder.addLocationRequest(mLocationRequest!!)
@@ -251,7 +236,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Проверка, есть ли закэшированные данные, и отображение, если есть*/
+    /** ВЫВОД ДАННЫХ НА ЭКРАН */
+
+    /** Отображение погоды для города, определенного по координатам */
+    private fun displayWeatherForCurrentCity(){
+        // Проверка наличия разрешения на определение местоположения
+        checkPermissionForLocation(this)
+        if (isLocationPermissionGranted) {
+            // Проверка, включен ли gps
+            if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                buildAlertMessageNoGps()
+            // Определение координат местоположения и отображение данных
+            startLocationUpdates()
+        }
+    }
+
+    /** Отображение закэшированных данных, если они есть */
     private fun displayCachedDataIfAny() {
     // Проверка, есть ли данные для отображения сейчас
         if (WeatherDataForDisplay.cityName != null)
@@ -265,7 +265,44 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Функции корутины. Отображение данных о погоде */
+    /** Отображение данных о погоде на экране */
+    fun displayWeatherData() {
+        addressTextView.text = "${WeatherDataForDisplay.cityName}, ${WeatherDataForDisplay.country}"
+
+        updatedAtTextView.text = WeatherDataForDisplay.currentDate
+
+        skyDescriptionTextView.text = "${WeatherDataForDisplay.skyDescription}"
+
+        tempTextView.text = "${WeatherDataForDisplay.temperature.toInt()}°C"
+        feelsLikeTextView.text = "feels like: ${WeatherDataForDisplay.feelsLike} °C"
+        tempMinTextView.text = "min temp: ${WeatherDataForDisplay.minTemperature} °C"
+        tempMaxTextView.text = "max temp: ${WeatherDataForDisplay.maxTemperature} °C"
+
+        sunriseTextView.text = WeatherDataForDisplay.sunrise
+        sunsetTextView.text = WeatherDataForDisplay.sunset
+        windTextView.text = "${WeatherDataForDisplay.windSpeed} м/с"
+
+        loaderProgressBar.visibility = View.GONE
+        mainContainer.visibility = View.VISIBLE
+    }
+
+    /** Отображение контейнера ожидания, пока сработает gps */
+    private fun showWaitContainer(){
+
+        // Отображение анимации на время, пока не получены координаты местоположения
+        if (latitude==null || longitude == null)
+        {
+            Glide.with(this)
+                .load(R.drawable.earth)
+                .apply(RequestOptions().transforms(RoundedCorners(10)))
+                .into(animationView)
+
+            waitContainer.visibility = View.VISIBLE
+        }
+    }
+
+    /** ФУНКЦИИ КОРУТИНЫ. ОТОБРАЖЕНИЕ ДАННЫХ О ПОГОДЕ */
+
     inner class WeatherTask : CoroutineScope {
         private var job: Job = Job()
         override val coroutineContext: CoroutineContext
@@ -332,7 +369,7 @@ class MainActivity : AppCompatActivity() {
                 displayWeatherData() // Отображение погоды на экране
 
                 /** Вывод иконки в соответствии с погодой */
-                Picasso.with(this@MainActivity)
+                Glide.with(this@MainActivity)
                     .load(CommonSettings.getImage(openWeatherMap.weather!![0].icon!!))
                     .into(imageView)
 
@@ -357,6 +394,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** ЗАПИСЬ И СОХРАНЕНИЕ ДАННЫХ */
+
     /** Запись данных о погоде, полученных с сервера, в переменные */
     fun writeOpenWeatherMapDataToWeatherDataForDisplay() {
         WeatherDataForDisplay.cityName = openWeatherMap.name
@@ -378,28 +417,6 @@ class MainActivity : AppCompatActivity() {
 
         WeatherDataForDisplay.windSpeed = openWeatherMap.wind!!.speed
 
-    }
-
-    /** Отображение данных о погоде на экране */
-    fun displayWeatherData() {
-        addressTextView.text = "${WeatherDataForDisplay.cityName}, ${WeatherDataForDisplay.country}"
-
-        updatedAtTextView.text = WeatherDataForDisplay.currentDate
-
-        skyDescriptionTextView.text = "${WeatherDataForDisplay.skyDescription}"
-
-        tempTextView.text = "${WeatherDataForDisplay.temperature.toInt()}°C"
-        feelsLikeTextView.text = "feels like: ${WeatherDataForDisplay.feelsLike} °C"
-        tempMinTextView.text = "min temp: ${WeatherDataForDisplay.minTemperature} °C"
-        tempMaxTextView.text = "max temp: ${WeatherDataForDisplay.maxTemperature} °C"
-
-        sunriseTextView.text = WeatherDataForDisplay.sunrise
-        sunsetTextView.text = WeatherDataForDisplay.sunset
-        windTextView.text = "${WeatherDataForDisplay.windSpeed} м/с"
-
-
-        loaderProgressBar.visibility = View.GONE
-        mainContainer.visibility = View.VISIBLE
     }
 
     /** Сохранение данных при свертывании активности */
