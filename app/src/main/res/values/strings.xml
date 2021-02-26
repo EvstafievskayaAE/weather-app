@@ -23,6 +23,7 @@
         please, give a location permission</string>
     <string name="wait_please">Please, wait, until gps finds you</string>
     <string name="find_my_city"><u>Find my city</u></string>
+    <string name="loading_data">Loading data...</string>
     <string-array name="cities">
         <item>Tokyo</item>
         <item>Moscow</item>

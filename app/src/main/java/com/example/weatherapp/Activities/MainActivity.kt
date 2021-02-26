@@ -77,12 +77,10 @@ class MainActivity : AppCompatActivity() {
 
         mLocationRequest = LocationRequest()
 
-        /** Запуск корутины для отображения погоды, если город выбран */
+        /** Запуск корутины для отображения погоды, если город выбран,
+         * иначе вызов окна включения gps, если дано разрешение на определение местоположения*/
         if (CommonSettings.isCityNameChosen)
             WeatherTask().execute()
-
-        /** Вызов окна включения gps, если дано разрешение на определение местоположения,
-         * а город не выбран */
         else displayWeatherForCurrentCity()
 
         /** Запуск активности для выбора города */
@@ -120,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                     Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     , REQUEST_GPS_CODE
                 )
-                showWaitContainer() // Загрузка анимации ожидания
+                showWaitContainer() // Отображение контейнера ожидания
             }
             .setNegativeButton("No") { dialog, id ->
                 dialog.cancel()
@@ -282,23 +280,17 @@ class MainActivity : AppCompatActivity() {
         sunsetTextView.text = WeatherDataForDisplay.sunset
         windTextView.text = "${WeatherDataForDisplay.windSpeed} м/с"
 
-        loaderProgressBar.visibility = View.GONE
+        waitContainer.visibility = View.GONE
         mainContainer.visibility = View.VISIBLE
     }
 
     /** Отображение контейнера ожидания, пока сработает gps */
     private fun showWaitContainer(){
 
-        // Отображение анимации на время, пока не получены координаты местоположения
+        // Отображение текста и спиннера на время, пока не получены координаты местоположения
         if (latitude==null || longitude == null)
-        {
-            Glide.with(this)
-                .load(R.drawable.earth)
-                .apply(RequestOptions().transforms(RoundedCorners(10)))
-                .into(animationView)
-
             waitContainer.visibility = View.VISIBLE
-        }
+
     }
 
     /** ФУНКЦИИ КОРУТИНЫ. ОТОБРАЖЕНИЕ ДАННЫХ О ПОГОДЕ */
@@ -347,8 +339,8 @@ class MainActivity : AppCompatActivity() {
 
         private suspend fun onPreExecute() {
             // Запуск прогресс бара при подготовке данных от сервера
-            waitContainer.visibility = View.GONE
-            loaderProgressBar.visibility = View.VISIBLE
+            waitTextTextView.text = getString(R.string.loading_data)
+            waitContainer.visibility = View.VISIBLE
             mainContainer.visibility = View.GONE
             errorTextTextView.visibility = View.GONE
             delay(PROGRESS_BAR_DELAY) // Задержка, чтобы при обновлении успевал прокрутиться прогресс бар
@@ -380,7 +372,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
             } catch (exception: Exception) {
-                loaderProgressBar.visibility = View.GONE
+                /*loaderProgressBar.visibility = View.GONE*/
+                waitContainer.visibility = View.GONE
 
                 /** Исключение возникает, если корутина не может получить данные.
                  * Первая причина - отсутствие интернета.

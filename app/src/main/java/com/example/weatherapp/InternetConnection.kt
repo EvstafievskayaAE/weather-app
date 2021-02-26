@@ -22,9 +22,7 @@ class InternetConnection(var context: Context) {
                             (networkInfo.type == ConnectivityManager.TYPE_WIFI ||
                                     networkInfo.type == ConnectivityManager.TYPE_MOBILE)
                 }
-            }
-            /** Проверка на устройствах с API от 23 */
-            else {
+            } else { /** Проверка на устройствах с API от 23 */
                 val network = connectivityManager.activeNetwork
                 if (network != null) {
                     val networkCapabilities =

@@ -16,14 +16,4 @@ class OkHttpHelper {
         return response.body()?.string()
     }
 
-    // POST network request
-    @Throws(IOException::class)
-    fun POST(client: OkHttpClient, url: HttpUrl?, body: RequestBody?): String? {
-        val request = Request.Builder()
-            .url(url)
-            .post(body)
-            .build()
-        val response = client.newCall(request).execute()
-        return response.body()!!.string()
-    }
 }
