@@ -15,7 +15,7 @@ open class DatabaseHelper(private var context: Context) : SQLiteOpenHelper(
 
     /** Основные параметры БЛ */
     companion object {
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
         private const val DATABASE_NAME = "WEATHER DATABASE"
     }
 
@@ -31,6 +31,7 @@ open class DatabaseHelper(private var context: Context) : SQLiteOpenHelper(
     /** Обновление базы данных */
     override fun onUpgrade(database: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         database!!.execSQL(CitiesClass.DROP_TABLE_QUERY)
+        database.execSQL(CacheDataClass.DROP_TABLE_QUERY)
         onCreate(database)
     }
 }

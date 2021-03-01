@@ -124,5 +124,7 @@ class CacheDataClass(context: Context) : DatabaseHelper(context) {
         const val INSERT_EMPTY_ROW_QUERY = "INSERT INTO $CACHE_TABLE_NAME DEFAULT VALUES"
 
         const val SELECT_ALL_QUERY = "SELECT * FROM $CACHE_TABLE_NAME"
+
+        const val DROP_TABLE_QUERY = "DROP TABLE IF EXISTS $CACHE_TABLE_NAME"
     }
 }
