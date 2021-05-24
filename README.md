@@ -1,5 +1,6 @@
 # weather-app
-Weather-app is client-server application for displaying weather in current city or city, selected from the list. 
+Weather-app is client-server application for displaying weather in current city or city, selected from the list.   
+*developed as learning project in January - February, 2021*
 ### Technologies used:
 - OpenWeatherMap API - to get weather data in real time acording to the specified parameters;
 - OkHttp - to create server requests;
